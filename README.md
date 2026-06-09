@@ -5,7 +5,7 @@ source alias.txt
 ## Database
 For production, MongoDB Operator or Bitnami Helm would be used.  
 <p align="left">
-  <img src="pic/mongodb_replicaset.jpg" width="600" alt="view"/>
+  <img src="kubernetes/pic/mongodb_replicaset.jpg" width="600" alt="view"/>
 </p>
 #### Clean all
 ```
