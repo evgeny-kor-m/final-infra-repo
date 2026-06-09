@@ -1,0 +1,15 @@
+alias k='kubectl '
+alias h='history'
+alias d='kubectl -n database'
+alias m='kubectl -n monitoring'
+alias getpods='kubectl -n $NAMESPACE get pods -o wide |egrep -v "1/1|2/2|3/3|4/4|Completed"'
+alias getpod='kubectl -n $NAMESPACE get po -o wide | grep $1'
+alias getns='kubectl get ns'
+alias setns='__setns(){ kubectl config set-context --current --namespace=$1; export NAMESPACE=$1; };__setns'
+alias ns='kubectl config view --minify --output 'jsonpath={..namespace}'; echo'
+alias c='clear'
+alias execpod='__execpod(){ kubectl -n $NAMESPACE exec -it $1 -- /bin/sh ; };__execpod'
+
+
+
+

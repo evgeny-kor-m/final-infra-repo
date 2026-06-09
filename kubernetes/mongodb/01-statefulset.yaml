@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: database
+  labels:
+    app: mongodb
+spec:
+  replicas: 3                          # 3 pods for Replica Set
+  serviceName: "mongodb-headless"      # must match Headless Service name
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      terminationGracePeriodSeconds: 10     # gracefully shutdown pods when scaling down
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        command:
+        - mongod
+        - "--replSet"                # enable Replica Set mode
+        - "rs0"                      # replica set name — must match Job
+        - "--bind_ip_all"            # accept connections from all IPs inside cluster
+        # - "--auth"                   # enable authentication
+        # - "--keyFile=/etc/mongodb/keyfile"  # required when --auth + --replSet are used together
+        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
+        ports:
+          - containerPort: 27017            # default MongoDB port
+        volumeMounts:
+          - mountPath: /data/db             # persistent data storage
+            name: mongodb-vol
+          - mountPath: /etc/mongodb/keyfile # keyFile mounted as single file from Secret
+            name: mongodb-keyfile
+            subPath: keyfile                # mount only this key from Secret, not entire Secret
+
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME  # root username from secret
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD  # root password from secret
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: password
+        - name: MONGO_INITDB_DATABASE       # initial database name to create
+          value: "hoteldb"
+
+        readinessProbe:                     # checks if pod is ready to receive traffic
+          exec:
+            command:
+            - bash
+            - -c
+            - |
+              mongosh --eval "db.adminCommand('ping')" --quiet ||
+              mongosh -u admin -p passw --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
+          initialDelaySeconds: 30           # wait 30s after start before first check
+          periodSeconds: 10                 # check every 10s
+          timeoutSeconds: 5                 # fail if no response in 5s
+          successThreshold: 1               # 1 success = ready
+          failureThreshold: 6               # 6 failures = not ready, remove from Service
+
+      volumes:
+      - name: mongodb-keyfile               # shared secret key for inter-node auth in Replica Set
+        secret:
+          secretName: mongodb-secret
+          items:
+          - key: keyfile
+            path: keyfile
+            mode: 0400                      # MongoDB requires strict 400 permissions on keyFile
+
+  volumeClaimTemplates:                     # auto-creates PVC for each pod
+  - metadata:
+      name: mongodb-vol
+    spec:
+      accessModes: [ "ReadWriteOnce" ]      # single node read-write
+      resources:
+        requests:
+          storage: 500Mi

@@ -1,0 +1,16 @@
+# Headless Service — creates DNS records for each pod individually
+# used by Replica Set members to communicate with each other
+# mongodb-0.mongodb-headless.database.svc.cluster.local
+# mongodb-1.mongodb-headless.database.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-headless
+  namespace: database
+spec:
+  clusterIP: None
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: mongodb

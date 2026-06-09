@@ -1,0 +1,12 @@
+# Regular Service — single IP for backend and mongo-express
+# used by applications to connect to MongoDB
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: database
+spec:
+  ports:
+  - port: 27017
+  selector:
+    app: mongodb

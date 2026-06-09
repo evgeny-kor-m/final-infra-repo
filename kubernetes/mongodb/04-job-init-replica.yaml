@@ -1,0 +1,89 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-init-replica
+  namespace: database
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: wait-for-mongodb          # waits until all MongoDB pods are ready
+        image: mongo:latest
+        command:
+        - bash
+        - -c
+        - |
+          echo "Waiting for mongodb-0..."
+          until mongosh mongodb-0.mongodb-headless.database.svc.cluster.local:27017 \
+            --eval "db.adminCommand('ping')" --quiet; do
+            echo "mongodb-0 not ready, retrying in 5s..."
+            sleep 5
+          done
+
+          echo "Waiting for mongodb-1..."
+          until mongosh mongodb-1.mongodb-headless.database.svc.cluster.local:27017 \
+            --eval "db.adminCommand('ping')" --quiet; do
+            echo "mongodb-1 not ready, retrying in 5s..."
+            sleep 5
+          done
+
+          echo "Waiting for mongodb-2..."
+          until mongosh mongodb-2.mongodb-headless.database.svc.cluster.local:27017 \
+            --eval "db.adminCommand('ping')" --quiet; do
+            echo "mongodb-2 not ready, retrying in 5s..."
+            sleep 5
+          done
+
+          echo "All MongoDB pods are ready!"
+
+      containers:
+      - name: init-replica
+        image: mongo:latest
+        command:
+        - bash
+        - -c
+        - |
+          mongosh mongodb-0.mongodb-headless.database.svc.cluster.local:27017 --eval "
+            rs.initiate({
+              _id: 'rs0',
+              members: [
+                {_id: 0, host: 'mongodb-0.mongodb-headless.database.svc.cluster.local:27017'},
+                {_id: 1, host: 'mongodb-1.mongodb-headless.database.svc.cluster.local:27017'},
+                {_id: 2, host: 'mongodb-2.mongodb-headless.database.svc.cluster.local:27017'}
+              ]
+            })
+          " || true
+
+          sleep 10
+
+          mongosh mongodb-0.mongodb-headless.database.svc.cluster.local:27017 \
+              --eval "
+              db = db.getSiblingDB('hoteldb');
+              db.createCollection('reservations');
+              db.createCollection('hotels');
+
+              db.hotels.createIndex({ hotel_id: 1 }, { unique: true })
+              db.reservations.createIndex({ reservation_id: 1 }, { unique: true })
+
+              db.hotels.insertMany([
+                { hotel_id: '1', hotel_name: 'Hilton', location: 'Tel Aviv', price_per_night: '700' },
+                { hotel_id: '2', hotel_name: 'Leonardo', location: 'Dead Sea', price_per_night: '800' },
+                { hotel_id: '3', hotel_name: 'Caesar Premier Eilat', location: 'Eilat', price_per_night: '900' }
+              ]);
+
+              db.reservations.insertOne({reservation_id: "1",full_name: "John Smite",email_address: "JohnSmite@domain.com",checkIn_date: "02/06/2026",checkOut_date: "10/06/2026",hotel_id: "1"});
+
+              db.getSiblingDB('admin').createUser({
+                  user: "backend_user",
+                  pwd: "backend_pass",
+                  roles: [{ role: "readWrite", db: "hoteldb" }]
+                });
+
+              db.createUser({
+                  user: "readonly_user", 
+                  pwd: "readonly_pass",
+                  roles: [{ role: "read", db: "hoteldb" }]
+                })  
+              print('Done!');             
+          "
+      restartPolicy: OnFailure
