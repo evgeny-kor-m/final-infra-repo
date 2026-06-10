@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e    # ← остановить скрипт при любой ошибке
 
 # 1. namespaces first
 kubectl apply -f kubernetes/namespaces/
@@ -23,10 +22,16 @@ kubectl exec mongodb-0 -n database -- mongosh /tmp/rs-initiate.js || true
 # wait for PRIMARY election
 sleep 15
 
-# create users
-kubectl cp kubernetes/mongodb/init-scripts/create-users.js \
-  database/mongodb-0:/tmp/create-users.js
-kubectl exec mongodb-0 -n database -- mongosh /tmp/create-users.js || true
+# create admin user (no credentials needed - localhost exception)
+kubectl cp kubernetes/mongodb/init-scripts/create-admin.js \
+  database/mongodb-0:/tmp/create-admin.js
+kubectl exec mongodb-0 -n database -- mongosh /tmp/create-admin.js || true
+
+# create other users with admin credentials
+kubectl cp kubernetes/mongodb/init-scripts/create-other-users.js \
+  database/mongodb-0:/tmp/create-other-users.js
+kubectl exec mongodb-0 -n database -- mongosh \
+  -u admin -p passw --authenticationDatabase admin  /tmp/create-other-users.js || true
 
 # create data
 kubectl cp kubernetes/mongodb/init-scripts/create-data.js \
@@ -36,6 +41,7 @@ kubectl exec mongodb-0 -n database -- mongosh \
 
 # 4. mongo-express
 kubectl apply -f kubernetes/mongo-express/ -n database
+#kubectl -n database port-forward svc/mongo-express-service 8081:8081
 
 # 5. backend
 # kubectl apply -f kubernetes/backend/ -n frontend

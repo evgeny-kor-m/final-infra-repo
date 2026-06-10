@@ -4,10 +4,10 @@ metadata:
   name: mongo-express-service
   namespace: database
 spec:
-  type: NodePort
+  type: NodePort                # opens a port on each cluster node. Accessible from outside the cluster.
   ports:
-  - port: 8081
-    targetPort: 8081
-    nodePort: 30001
+  - port: 8081                  # the port of the Service itself within the cluster. Other pods access this port.
+    targetPort: 8081            # the port inside the Container to which traffic is forwarded. Must match the containerPort in the Deployment.
+    nodePort: 30001             # the port on the K8s node accessible from outside.
   selector:
-    app: mongo-express
+    app: mongo-express          # finds pods with this label and routes traffic to them.

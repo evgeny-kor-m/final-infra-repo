@@ -9,6 +9,7 @@ For production, MongoDB Operator or Bitnami Helm would be used.
 #### Clean all
 ```
 kubectl delete statefulset mongodb -n database
+kubectl delete deploy mongo-express  -n database
 kubectl get pods -n database -w
 kubectl delete pvc --all -n database
 kubectl delete namespace database
