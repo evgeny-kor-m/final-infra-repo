@@ -6,8 +6,6 @@ source alias.txt
 
 <p align="left">
   <img src="kubernetes/pic/mongodb_replicaset.jpg" width="500" alt="view"/>
-</p>
-<p align="right">
   <img src="kubernetes/pic/3replicas.jpg" width="500" alt="view"/>
 </p>
 
