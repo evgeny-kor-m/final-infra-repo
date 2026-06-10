@@ -105,17 +105,18 @@ exit
 #### Connection string for application
 Must use all replicas in URL to allow MongoDB driver to route reads to Secondary and writes to Primary.
 ```
-mongodb://backend_user:backend_pass@mongodb-0.mongodb-headless.database.svc.cluster.local:27017,
-                                    mongodb-1.mongodb-headless.database.svc.cluster.local:27017,
-                                    mongodb-2.mongodb-headless.database.svc.cluster.local:27017/hoteldb?replicaSet=rs0&readPreference=secondaryPreferred
+mongodb://backend_user:backend_pass@
+      mongodb-0.mongodb-headless.database.svc.cluster.local:27017,
+      mongodb-1.mongodb-headless.database.svc.cluster.local:27017,
+      mongodb-2.mongodb-headless.database.svc.cluster.local:27017/hoteldb?replicaSet=rs0&readPreference=secondaryPreferred
 
-readPreference       | Behavior 
---------------------------------------------------------- 
-`primary`            | only (default)
-`primaryPreferred`   | Primary, if unavailable - Secondary
-`secondary`          | only
-`secondaryPreferred` | Secondary, if unavailable - Primary
-`nearest`            | Least Latency
+| readPreference       | Behavior                            |
+|------------------------------------------------------------|
+| `primary`            | only (default)                      |
+| `primaryPreferred`   | Primary, if unavailable - Secondary |
+| `secondary`          | only                                |
+| `secondaryPreferred` | Secondary, if unavailable - Primary |
+| `nearest`            | Least Latency                       |
 
 > Note: Writes always go to Primary regardless of readPreference.
 ```
