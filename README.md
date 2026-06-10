@@ -7,6 +7,10 @@ source alias.txt
 <p align="left">
   <img src="kubernetes/pic/mongodb_replicaset.jpg" width="500" alt="view"/>
 </p>
+<p align="rigth">
+  <img src="kubernetes/pic/3replicas.jpg" width="500" alt="view"/>
+</p>
+
 For production, MongoDB Operator or Bitnami Helm would be used.  
 
 #### Clean all
