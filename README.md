@@ -4,11 +4,6 @@ source alias.txt
 
 ## Database
 
-<p align="left">
-  <img src="kubernetes/pic/mongodb_replicaset.jpg" width="500" alt="view"/>
-  <img src="kubernetes/pic/3replicas.jpg" width="500" alt="view"/>
-</p>
-
 For production, MongoDB Operator or Bitnami Helm would be used.  
 
 #### Clean all
@@ -37,7 +32,10 @@ kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw  --eval "db.
 To deploy a 3-replica MongoDB Replica Set in Kubernetes, use a StatefulSet along with a Headless Service to provide each database pod with a stable, predictable network identity
 - Headless Service - When combined with StatefulSets, they can give you unique DNS addresses that let you directly access the pods! This is perfect for creating MongoDB replica sets, because our app needs to connect to all of the MongoDB nodes individually.   
 
-
+<p align="left">
+  <img src="kubernetes/pic/mongodb_replicaset.jpg" width="500" alt="view"/>
+  <img src="kubernetes/pic/3replicas.jpg" width="500" alt="view"/>
+</p>
 
 ##### Manually
 In the kubernetes/mongodb/statefulset.yaml
@@ -103,4 +101,21 @@ db.reservations.deleteOne({ full_name: "John Smite" })
 
 # exit
 exit
+```
+#### Connection string for application
+Must use all replicas in URL to allow MongoDB driver to route reads to Secondary and writes to Primary.
+```
+mongodb://backend_user:backend_pass@mongodb-0.mongodb-headless.database.svc.cluster.local:27017,
+                                    mongodb-1.mongodb-headless.database.svc.cluster.local:27017,
+                                    mongodb-2.mongodb-headless.database.svc.cluster.local:27017/hoteldb?replicaSet=rs0&readPreference=secondaryPreferred
+
+readPreference       | Behavior 
+--------------------------------------------------------- 
+`primary`            | only (default)
+`primaryPreferred`   | Primary, if unavailable - Secondary
+`secondary`          | only
+`secondaryPreferred` | Secondary, if unavailable - Primary
+`nearest`            | Least Latency
+
+> Note: Writes always go to Primary regardless of readPreference.
 ```
