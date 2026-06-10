@@ -35,7 +35,7 @@ kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw  --eval "db.
 To deploy a 3-replica MongoDB Replica Set in Kubernetes, use a StatefulSet along with a Headless Service to provide each database pod with a stable, predictable network identity
 - Headless Service - When combined with StatefulSets, they can give you unique DNS addresses that let you directly access the pods! This is perfect for creating MongoDB replica sets, because our app needs to connect to all of the MongoDB nodes individually.   
 
-https://oneuptime.com/blog/post/2026-01-25-mongodb-replica-sets-kubernetes/view
+
 
 ##### Manually
 In the kubernetes/mongodb/statefulset.yaml
@@ -52,7 +52,26 @@ spec:
         - "rs0"                      # Sets the replica set name must match Job
         - "--bind_ip_all"            # accept connections from all IPs
         - "--auth"                   # enable authentication
+------------
+# Wait for all pods to be running
+
+# Connect to primary and initialize replica set
+kubectl exec -it mongodb-0 -n mongodb -- mongosh
+
+# In mongosh shell:
+rs.initiate({
+  _id: "rs0",
+  members: [
+    { _id: 0, host: "mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 2 },
+    { _id: 1, host: "mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 1 },
+    { _id: 2, host: "mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 1 }
+  ]
+})
+
+# Verify replica set status
+rs.status()
 ```
+Example :  https://oneuptime.com/blog/post/2026-01-25-mongodb-replica-sets-kubernetes/view   
 
 #### Craete Mongo Express viewer
 ```
@@ -61,7 +80,7 @@ kubectl -n database port-forward svc/mongo-express-service 8081:8081
 ```
 #### (Optionaly) Manually add row into table
 ```
-kubectl exec -it mongodb-0 -n database -- mongosh
+kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw
 # show all databases
 show dbs
 

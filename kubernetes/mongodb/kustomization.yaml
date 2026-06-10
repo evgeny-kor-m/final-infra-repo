@@ -6,7 +6,7 @@ resources:
   - 01-statefulset.yaml
   - 02-service.yaml
   - 03-service-headless.yaml     
-  - 04-job-init-replica.yaml     
+  # - 04-job-init-replica.yaml     
 
 # configMapGenerator:                 # creates a ConfigMap automatically from a file
 #   - name: mongodb-init-cm
