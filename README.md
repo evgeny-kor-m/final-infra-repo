@@ -121,3 +121,7 @@ mongodb://backend_user:backend_pass@
 
 > Note: Writes always go to Primary regardless of readPreference.
 ```
+For developing:
+```
+kubectl port-forward service/mongodb-service 27017:27017 -n database
+```
