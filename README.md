@@ -1,6 +1,6 @@
 # final-infra-repo
 
-## Database
+## Database MongoDB
 
 For production, MongoDB Operator or Bitnami Helm would be used.  
 ### Scop
