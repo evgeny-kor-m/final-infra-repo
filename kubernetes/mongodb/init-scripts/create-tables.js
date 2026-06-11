@@ -17,6 +17,14 @@ db.createCollection("reservations", {
                     bsonType: "string",
                     description: "must, not null"
                 },
+                checkIn_date: {
+                    bsonType: "string",
+                    description: "must, not null"
+                },
+                checkOut_date: {
+                    bsonType: "string",
+                    description: "must, not null"
+                },
                 hotel_id: {
                     bsonType: "int",
                     description: "must, not null"
