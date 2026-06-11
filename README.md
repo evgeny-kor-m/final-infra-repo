@@ -1,11 +1,25 @@
 # final-infra-repo
 
-source alias.txt
-
 ## Database
 
 For production, MongoDB Operator or Bitnami Helm would be used.  
-
+### Scop
+```
+1. kubectl apply -k kubernetes/mongodb/
+2. StatefulSet creates 3 pods
+3. deploy.sh waits for all pods to be Ready
+4. rs.initiate() via kubectl exec (localhost exception)
+5. sleep 15 (waiting for PRIMARY)
+6. createUser: admin (without credentials)
+7. createUser: backend_user, readonly_user (with credentials)
+8. createCollection + createIndex + insertMany
+9. keyFile created manually via openssl → added to Secret
+10. MongoDB works with --auth
+```
+#### Aliases
+```
+source alias.txt
+```
 #### Clean all
 ```
 kubectl delete statefulset mongodb -n database
