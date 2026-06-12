@@ -33,6 +33,12 @@ kubectl cp kubernetes/mongodb/init-scripts/create-other-users.js \
 kubectl exec mongodb-0 -n database -- mongosh \
   -u admin -p passw --authenticationDatabase admin  /tmp/create-other-users.js || true
 
+# create tables
+kubectl cp kubernetes/mongodb/init-scripts/create-tables.js \
+  database/mongodb-0:/tmp/create-other-users.js
+kubectl exec mongodb-0 -n database -- mongosh \
+  -u admin -p passw --authenticationDatabase admin  /tmp/create-tables.js || true
+
 # create data
 kubectl cp kubernetes/mongodb/init-scripts/create-data.js \
   database/mongodb-0:/tmp/create-data.js
