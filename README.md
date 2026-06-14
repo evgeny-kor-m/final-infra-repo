@@ -43,6 +43,15 @@ k get pvc
 d get sts mongodb
 kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw  --eval "db.version()"
 ```
+#### Encoding values in secrets
+```
+echo -n "backend_user" | base64
+# → YmFja2VuZF91c2Vy
+
+# Decoding 
+echo "YmFja2VuZF91c2Vy" | base64 --decode
+```
+
 #### Set Up 3 Replicas
 To deploy a 3-replica MongoDB Replica Set in Kubernetes, use a StatefulSet along with a Headless Service to provide each database pod with a stable, predictable network identity
 - Headless Service - When combined with StatefulSets, they can give you unique DNS addresses that let you directly access the pods! This is perfect for creating MongoDB replica sets, because our app needs to connect to all of the MongoDB nodes individually.   
@@ -139,3 +148,28 @@ For developing
 ```
 kubectl port-forward service/mongodb-service 27017:27017 -n database
 ```
+
+## Backend 
+
+kubectl create configmap backend-cm \
+  --from-literal=DB_NAME=hoteldb \
+  --from-literal=DB_HOST="mongodb-0.mongodb-headless.database.svc.cluster.local:27017,mongodb-1.mongodb-headless.database.svc.cluster.local:27017,mongodb-2.mongodb-headless.database.svc.cluster.local:27017" \
+  --from-literal=DB_PORT=27017 \
+  --from-literal=DB_CONNECT_STR="?authSource=admin&directConnection=true" \
+  --dry-run=client -o yaml > 03-configmap.yaml
+
+
+#### Temporary Solution:
+Upload the image to the kind cluster:
+```
+# Upload the local image to kind
+kind load docker-image backend-image:latest --name kind-01
+
+# Check that it loaded
+docker exec -it kind-01-worker crictl images | grep backend
+```
+
+kubectl port-forward service/backend-service 5000:5000 -n backend
+
+
+

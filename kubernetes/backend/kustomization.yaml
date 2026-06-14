@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - backend-secret.yaml
+  - 01-configmap.yaml
+  - 02-deployment.yaml
+  - 03-service.yaml     
+
+# configMapGenerator:                 # creates a ConfigMap automatically from a file
+#   - name: mongodb-init-cm
+#     namespace: database
+#     files:
+#       - mongo-init.js=init-scripts/mongo-init.js

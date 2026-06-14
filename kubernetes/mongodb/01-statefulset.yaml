@@ -20,6 +20,7 @@ spec:
       containers:
       - name: mongodb
         image: mongo:latest
+        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
         command:
         - mongod
         - "--replSet"                       # enable Replica Set mode
@@ -27,7 +28,6 @@ spec:
         - "--bind_ip_all"                   # accept connections from all IPs inside cluster
         - "--auth"                          # enable authentication
         - "--keyFile=/etc/mongodb/keyfile"  # required when --auth + --replSet are used together
-        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
         ports:
           - containerPort: 27017            # default MongoDB port
         volumeMounts:
