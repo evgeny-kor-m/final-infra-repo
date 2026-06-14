@@ -1,11 +1,13 @@
 #!/bin/bash
-# cleanup.sh — full clean
+# cleanup.sh — database namespace clean
 
 kubectl delete sts mongodb -n database
 kubectl delete deploy mongo-express -n database
 
 kubectl wait --for=delete pod --all -n database --timeout=60s
 
+kubectl delete svc mongodb-service -n database
+kubectl delete svc mongodb-headless -n database
 kubectl delete pvc --all -n database
 
 kubectl wait --for=delete pvc --all -n database --timeout=60s
