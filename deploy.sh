@@ -50,7 +50,8 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 #kubectl -n database port-forward svc/mongo-express-service 8081:8081
 
 # 5. backend
-# kubectl apply -k kubernetes/backend/ -n backend
+kubectl apply -k kubernetes/backend/ -n backend
+# kubectl port-forward service/backend-service 5000:5000 -n backend
 
 # 6. frontend
 # kubectl apply -f kubernetes/frontend/ -n frontend
