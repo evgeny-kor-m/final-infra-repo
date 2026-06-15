@@ -1,0 +1,18 @@
+# Regular Service — single IP for Jenkins 
+# used by applications to connect to nexus
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-service
+  namespace: nexus-ns
+spec:
+  type: ClusterIP
+  ports:
+  - name: ui
+    port: 8081
+    targetPort: 8081
+  - name: docker
+    port: 8083
+    targetPort: 8083
+  selector:
+    app: nexus-srv

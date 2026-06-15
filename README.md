@@ -171,5 +171,39 @@ docker exec -it kind-01-worker crictl images | grep backend
 
 kubectl port-forward service/backend-service 5000:5000 -n backend
 
+## Nexus
+```
+kubectl apply -f kubernetes/namespaces/
+
+kubectl apply -f kubernetes/nexus/
+
+kubectl wait --for=condition=Ready pod -n nexus-ns --all --timeout=60s
+
+# Check password for user admin:
+kubectl exec nexus-0 -- cat /nexus-data/admin.password ; echo
+
+kubectl port-forward pod/nexus-0 8083:8081 -n nexus-ns
+http://127.0.0.1:8083
+
+# Change password 
+admin/nexusadmin
+
+[v] Enable anonymous access
+Settings -> Repository -> Create Repository docker(hosted) Name: backend-image / docker-hosted
+[v] Other Connectors
+  [v] HTTP 8083
+[v] Allow anonymous Docker pulls
+Deployment policy : Allow redeploy
 
 
+kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns
+
+
+http://127.0.0.1:8082/repository/backend-image/
+docker login localhost:8082
+docker tag backend-image:latest localhost:8082/repository/backend-image:latest 
+docker push localhost:8082/repository/backend-image:latest
+
+
+
+```
