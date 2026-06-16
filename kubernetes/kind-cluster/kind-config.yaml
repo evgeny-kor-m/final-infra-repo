@@ -32,6 +32,6 @@ nodes:
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.configs."nexus-service.nexus-ns.svc.cluster.local:8083".tls]
-    insecure_skip_verify = true  # Set to false if using valid, trusted SSL certificates
+    insecure_skip_verify = true
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."nexus-service.nexus-ns.svc.cluster.local:8083"]
     endpoint = ["http://nexus-service.nexus-ns.svc.cluster.local:8083"]

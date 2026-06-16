@@ -161,7 +161,7 @@ kubectl create configmap backend-cm \
   --dry-run=client -o yaml > 03-configmap.yaml
 
 
-#### Temporary Solution:
+#### Temporary Solution. Copy image into cluster manually
 Upload the image to the kind cluster:
 ```
 #1. Remove the old one from kind
@@ -174,6 +174,8 @@ kind load docker-image backend-image:latest --name kind-01
 
 # Check that it loaded
 docker exec -it kind-01-worker crictl images | grep backend
+docker exec -it kind-01-worker2 crictl images | grep backend
+docker exec -it kind-01-control-plane crictl images | grep backend
 ```
 
 kubectl port-forward service/backend-service 5000:5000 -n backend
@@ -194,7 +196,7 @@ docker login 172.26.13.131:8083 -u admin -p nexusadmin
 }
 Save & Apply
 
-kubectl port-forward svc/nexus-service 8083:8083 -n nexus-ns --address=0.0.0.0 &
+kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
 
 docker login 172.26.13.131:8083 -u admin -p nexusadmin
 docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
@@ -225,6 +227,9 @@ Settings -> Repository -> Create Repository docker(hosted) Name: backend-image /
 [v] Allow anonymous Docker pulls
 Deployment policy : Allow redeploy
 
+Settings -> Security -> Realms
+Docker Bearer Token Realm -> move to -> Active
+Save
 
 kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns  --address=0.0.0.0 &
 

@@ -1,7 +1,9 @@
 
 ### Prerequisite for pushing image from Docker Desktop (locally) -> port-forward + insecure-registry с IP WSL
 
-
+#### Issue with pushing the images.
+```
+Problem with defferent network  
 ┌──────────────────────────────────────────────────────────┐
 │  Laptop (Windows)                                        │
 │                                                          │
@@ -32,7 +34,7 @@
 │  │  └────────────────────────────────────────────┘   │   │
 │  └───────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────┘
-
+```
 ```
 # Find out the WSL IP
 hostname -I | awk '{print $1}'

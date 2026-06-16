@@ -1,10 +1,24 @@
 #!/bin/bash
+source .env
+source alias.txt
 
 # 1. namespaces first
 kubectl apply -f kubernetes/namespaces/
 
 # 2. secrets
 kubectl apply -k kubernetes/secrets/
+
+kubectl create secret docker-registry nexus-registry-secret \
+  --docker-server=nexus-service.nexus-ns.svc.cluster.local:8083 \
+  --docker-username=${NEXUS_USER} \
+  --docker-password=${NEXUS_PASSWORD} \
+  -n backend
+
+kubectl create secret docker-registry nexus-registry-secret \
+  --docker-server=nexus-service.nexus-ns.svc.cluster.local:8083 \
+  --docker-username=${NEXUS_USER} \
+  --docker-password=${NEXUS_PASSWORD} \
+  -n frontend
 
 # 3. mongodb
 kubectl apply -k kubernetes/mongodb/
@@ -49,32 +63,34 @@ kubectl exec mongodb-0 -n database -- mongosh \
 kubectl apply -f kubernetes/mongo-express/ -n database
 #kubectl -n database port-forward svc/mongo-express-service 8081:8081
 
-# 5. nexus
-kubectl apply -f kubernetes/nexus/ -n nexus-ns
-kubectl wait --for=condition=Ready pod/nexus-0 -n nexus-ns --timeout=300s
-kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0 &
+# # 5. nexus
+# kubectl apply -f kubernetes/nexus/ -n nexus-ns
+# kubectl wait --for=condition=Ready pod/nexus-0 -n nexus-ns --timeout=300s
+# kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0 > /dev/null 2>&1 &
 
 ### ---------------------------------------manually---------------------------------------
 
-# Получи пароль
-kubectl exec -it nexus-0 -n nexus-ns -- sh -c "cat /nexus-data/admin.password" ; echo
+# # Получи пароль
+# kubectl exec -it nexus-0 -n nexus-ns -- sh -c "cat /nexus-data/admin.password" ; echo
+# Change password: admin/nexusadmin
+# # Смени через API
+# curl -X PUT \
+#   "http://localhost:8082/service/rest/v1/security/users/admin/change-password" \
+#   -H "Content-Type: text/plain" \
+#   -u admin:00bb4c5e-1afb-4bde-ab3c-45ba6d276230 \
+#   -d "nexusadmin"
 
-# Смени через API
-curl -X PUT \
-  "http://localhost:8082/service/rest/v1/security/users/admin/change-password" \
-  -H "Content-Type: text/plain" \
-  -u admin:00bb4c5e-1afb-4bde-ab3c-45ba6d276230 \
-  -d "nexusadmin"
+# docker login 172.26.13.131:8083 -u admin -p nexusadmin
+# docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
+# docker push 172.26.13.131:8083/backend-image:latest
 
-docker login 172.26.13.131:8083 -u admin -p nexusadmin
-docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
-docker push 172.26.13.131:8083/backend-image:latest
+# # 5. backend
+# kubectl apply -k kubernetes/backend/ -n backend
+# kubectl wait --for=condition=Ready pod/backend-app -n backend --timeout=300s
+# kubectl port-forward service/backend-service 5000:5000 -n backend &
 
-# 5. backend
-kubectl apply -k kubernetes/backend/ -n backend
-kubectl wait --for=condition=Ready pod/backend-app -n backend --timeout=300s
-kubectl port-forward service/backend-service 5000:5000 -n backend &
-
-# ps aux | grep port-forward
-# 6. frontend
-# kubectl apply -f kubernetes/frontend/ -n frontend
+# # ps aux | grep port-forward
+# # kill 43329  or ->
+# # pkill -f "port-forward svc/nexus-service"
+# # 6. frontend
+# # kubectl apply -f kubernetes/frontend/ -n frontend
