@@ -129,10 +129,7 @@ exit
 #### Connection string for application
 Must use all replicas in URL to allow MongoDB driver to route reads to Secondary and writes to Primary.
 ```
-mongodb://backend_user:backend_pass@
-      mongodb-0.mongodb-headless.database.svc.cluster.local:27017,
-      mongodb-1.mongodb-headless.database.svc.cluster.local:27017,
-      mongodb-2.mongodb-headless.database.svc.cluster.local:27017/hoteldb?replicaSet=rs0&readPreference=secondaryPreferred
+mongodb://backend_user:backend_pass@mongodb-service.database.svc.cluster.local:27017/hoteldb?replicaSet=rs0&readPreference=secondaryPreferred
 
 | readPreference       | Behavior                            |
 |------------------------------------------------------------|
@@ -149,19 +146,29 @@ For developing
 kubectl port-forward service/mongodb-service 27017:27017 -n database
 ```
 
+## Mongo-express
+
+http://localhost:30001
+
+
 ## Backend 
 
 kubectl create configmap backend-cm \
   --from-literal=DB_NAME=hoteldb \
-  --from-literal=DB_HOST="mongodb-0.mongodb-headless.database.svc.cluster.local:27017,mongodb-1.mongodb-headless.database.svc.cluster.local:27017,mongodb-2.mongodb-headless.database.svc.cluster.local:27017" \
+  --from-literal=DB_HOST="mongodb-service.database.svc.cluster.local" \
   --from-literal=DB_PORT=27017 \
-  --from-literal=DB_CONNECT_STR="?authSource=admin&directConnection=true" \
+  --from-literal=DB_CONNECT_STR="?authSource=admin&replicaSet=rs0&readPreference=secondaryPreferred" \
   --dry-run=client -o yaml > 03-configmap.yaml
 
 
 #### Temporary Solution:
 Upload the image to the kind cluster:
 ```
+#1. Remove the old one from kind
+docker exec -it kind-01-worker crictl rmi backend-image:latest
+docker exec -it kind-01-worker2 crictl rmi backend-image:latest
+docker exec -it kind-01-control-plane crictl rmi backend-image:latest
+
 # Upload the local image to kind
 kind load docker-image backend-image:latest --name kind-01
 
@@ -172,6 +179,29 @@ docker exec -it kind-01-worker crictl images | grep backend
 kubectl port-forward service/backend-service 5000:5000 -n backend
 
 ## Nexus
+
+### Prerequisite for pushing image from Docker Desktop (locally) -> port-forward + insecure-registry с IP WSL
+```
+# Find out the WSL IP
+hostname -I | awk '{print $1}'
+
+# Login via IP
+docker login 172.26.13.131:8083 -u admin -p nexusadmin
+
+# Docker Desktop -> Settings -> Docker Engine
+{
+  "insecure-registries": [ "172.26.13.131:8083" ]
+}
+Save & Apply
+
+kubectl port-forward svc/nexus-service 8083:8083 -n nexus-ns --address=0.0.0.0 &
+
+docker login 172.26.13.131:8083 -u admin -p nexusadmin
+docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
+docker push 172.26.13.131:8083/backend-image:latest
+
+```
+
 ```
 kubectl apply -f kubernetes/namespaces/
 
@@ -180,7 +210,7 @@ kubectl apply -f kubernetes/nexus/
 kubectl wait --for=condition=Ready pod -n nexus-ns --all --timeout=60s
 
 # Check password for user admin:
-kubectl exec nexus-0 -- cat /nexus-data/admin.password ; echo
+kubectl exec nexus-0 -n nexus-ns -- cat /nexus-data/admin.password ; echo
 
 kubectl port-forward pod/nexus-0 8083:8081 -n nexus-ns
 http://127.0.0.1:8083
@@ -196,7 +226,7 @@ Settings -> Repository -> Create Repository docker(hosted) Name: backend-image /
 Deployment policy : Allow redeploy
 
 
-kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns
+kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns  --address=0.0.0.0 &
 
 
 http://127.0.0.1:8082/repository/backend-image/
@@ -207,3 +237,7 @@ docker push localhost:8082/repository/backend-image:latest
 
 
 ```
+
+
+
+## Ingress 

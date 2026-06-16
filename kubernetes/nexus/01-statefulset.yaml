@@ -25,42 +25,7 @@ spec:
         volumeMounts:
           - mountPath: /nexus-data          # persistent data storage
             name: nexus-vol
-
-      #   env:
-      #   - name: MONGO_INITDB_ROOT_USERNAME  # root username from secret
-      #     valueFrom:
-      #       secretKeyRef:
-      #         name: mongodb-secret
-      #         key: username
-      #   - name: MONGO_INITDB_ROOT_PASSWORD  # root password from secret
-      #     valueFrom:
-      #       secretKeyRef:
-      #         name: mongodb-secret
-      #         key: password
-      #   - name: MONGO_INITDB_DATABASE       # initial database name to create
-      #     value: "hoteldb"
-
-      #   readinessProbe:                     # checks if pod is ready to receive traffic
-      #     exec:
-      #       command:
-      #         - mongosh
-      #         - --eval
-      #         - "db.adminCommand('ping')"
-      #     initialDelaySeconds: 5           # wait 5s after start before first check
-      #     periodSeconds: 5                 # check every 5s
-      #     timeoutSeconds: 3                # fail if no response in 3s
-      #     successThreshold: 1              # 1 success = ready
-      #     failureThreshold: 6              # 6 failures = not ready, remove from Service
-
-      # volumes:
-      # - name: mongodb-keyfile               # shared secret key for inter-node auth in Replica Set
-      #   secret:
-      #     secretName: mongodb-secret
-      #     defaultMode: 0400                 # MongoDB requires strict 400 permissions on keyFile
-      #     items:
-      #     - key: keyfile
-      #       path: keyfile
-                    
+             
   volumeClaimTemplates:                     # auto-creates PVC for pod
   - metadata:
       name: nexus-vol                     
