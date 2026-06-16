@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app
+  namespace: frontend-ns
+  labels:
+    app: frontend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      imagePullSecrets:
+      - name: nexus-registry-secret
+      containers:
+      - name: frontend-container
+        # image: backend-image:latest
+        image: nexus-service.nexus-ns.svc.cluster.local:8083/frontend-image:latest
+        imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
+        ports:
+        - containerPort: 5000
+
+        env:
+        # From Secret
+        - name: DB_USERNAME                   # 
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_USERNAME
+        - name: DB_PASSWORD                   # 
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_PASSWORD   
+        # From ConfigMap    
+        - name: DB_CONNECT_STR
+          valueFrom:
+            configMapKeyRef:
+              name: backend-cm
+              key: DB_CONNECT_STR 
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend-cm
+              key: DB_HOST
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: backend-cm
+              key: DB_NAME
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-cm
+              key: DB_PORT                                    
+
+        envFrom:
+        # All keys from app-config become environment variables
+        - configMapRef:
+            name: backend-cm
