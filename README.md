@@ -160,6 +160,7 @@ kubectl create configmap backend-cm \
   --from-literal=DB_CONNECT_STR="?authSource=admin&replicaSet=rs0&readPreference=secondaryPreferred" \
   --dry-run=client -o yaml > 03-configmap.yaml
 
+kubectl port-forward service/backend-service 5000:5000 -n backend &
 
 #### Temporary Solution. Copy image into cluster manually
 Upload the image to the kind cluster:
