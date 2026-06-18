@@ -158,7 +158,7 @@ kubectl create configmap backend-cm \
   --from-literal=DB_HOST="mongodb-service.database.svc.cluster.local" \
   --from-literal=DB_PORT=27017 \
   --from-literal=DB_CONNECT_STR="?authSource=admin&replicaSet=rs0&readPreference=secondaryPreferred" \
-  --dry-run=client -o yaml > 03-configmap.yaml
+  --dry-run=client -o yaml > 01-configmap.yaml
 
 kubectl port-forward service/backend-service 5000:5000 -n backend &
 
@@ -242,6 +242,12 @@ docker push localhost:8082/repository/backend-image:latest
 
 ```
 ## Frontend 
-
+```
+kubectl create configmap backend-cm \
+  --from-literal=BACKEND_URL="backend-service.backend.svc.cluster.local:5000" \
+  --dry-run=client -o yaml > 01-configmap.yaml
+# Run
+  kubectl apply -f kubernetes/frontend/ -n frontend
+  ```
 
 ## Ingress 

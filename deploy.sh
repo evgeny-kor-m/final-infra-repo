@@ -70,10 +70,10 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 
 ### ---------------------------------------manually---------------------------------------
 
-# # Получи пароль
+# # Take password
 # kubectl exec -it nexus-0 -n nexus-ns -- sh -c "cat /nexus-data/admin.password" ; echo
 # Change password: admin/nexusadmin
-# # Смени через API
+# # Change via API
 # curl -X PUT \
 #   "http://localhost:8082/service/rest/v1/security/users/admin/change-password" \
 #   -H "Content-Type: text/plain" \
