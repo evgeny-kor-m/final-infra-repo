@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app
+  namespace: frontend
+  labels:
+    app: frontend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      imagePullSecrets:
+      - name: nexus-registry-secret
+      containers:
+      - name: frontend-container
+        # image: backend-image:latest
+        image: nexus-service.nexus-ns.svc.cluster.local:8083/frontend-image:latest
+        imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
+        ports:
+        - containerPort: 3000
+
+        env: 
+        # From ConfigMap    
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-cm
+              key: BACKEND_URL 
+                                  
+        envFrom:
+        # All keys from app-config become environment variables
+        - configMapRef:
+            name: frontend-cm

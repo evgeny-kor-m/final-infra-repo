@@ -1,9 +1,9 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-cm
 data:
   DB_CONNECT_STR: "?authSource=admin&replicaSet=rs0&readPreference=secondaryPreferred"
   DB_HOST: "mongodb-service.database.svc.cluster.local"
   DB_NAME: "hoteldb"
   DB_PORT: "27017"
-kind: ConfigMap
-metadata:
-  name: backend-cm
