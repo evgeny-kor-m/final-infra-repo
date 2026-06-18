@@ -240,10 +240,8 @@ docker login localhost:8082
 docker tag backend-image:latest localhost:8082/repository/backend-image:latest 
 docker push localhost:8082/repository/backend-image:latest
 
-
-
 ```
-
+## Frontend 
 
 
 ## Ingress 
