@@ -250,4 +250,13 @@ kubectl create configmap backend-cm \
   kubectl apply -f kubernetes/frontend/ -n frontend
   ```
 
+## Jenkins
+```
+# Run
+  kubectl apply -f kubernetes/jenkins/jenkins-master -n frontend
+k get all,cm,secrets
+```
+
+
+
 ## Ingress 

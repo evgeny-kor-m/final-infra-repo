@@ -20,6 +20,12 @@ kubectl create secret docker-registry nexus-registry-secret \
   --docker-password=${NEXUS_PASSWORD} \
   -n frontend
 
+kubectl create secret docker-registry nexus-registry-secret \
+  --docker-server=nexus-service.nexus-ns.svc.cluster.local:8083 \
+  --docker-username=${NEXUS_USER} \
+  --docker-password=${NEXUS_PASSWORD} \
+  -n jenkins-ns
+
 # 3. mongodb
 kubectl apply -k kubernetes/mongodb/
 

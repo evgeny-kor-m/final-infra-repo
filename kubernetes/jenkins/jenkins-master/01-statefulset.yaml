@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: jenkins
   namespace: jenkins-ns
@@ -48,10 +48,16 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 3
+
           volumeMounts:
             - name: jenkins-vol
-              mountPath: /var/jenkins_home         
-      volumes:
-        - name: jenkins-vol
-          persistentVolumeClaim:
-              claimName: jenkins-pv-claim
+              mountPath: /var/jenkins_home   
+
+  volumeClaimTemplates:                     # auto-creates PVC for each pod
+  - metadata:
+      name: jenkins-vol
+    spec:
+      accessModes: [ "ReadWriteOnce" ]      # single node read-write
+      resources:
+        requests:
+          storage: 1Gi

@@ -10,20 +10,20 @@ https://devopscube.com/setup-jenkins-on-kubernetes-cluster/
 5. Create a service YAML and deploy it.
 
 # Run
-  kubectl apply -f kubernetes/jenkins/ -n jenkins-ns
+```
+  kubectl apply -f kubernetes/jenkins/jenkins-master -n jenkins-ns
 
-  kubectl exec jenkins-97f9bfbdb-ptbrx  -n jenkins-ns -- cat /var/jenkins_home/secrets/initialAdminPassword
-  38f28921d6ea4fd9bbb5333262f59d8e
+  kubectl exec jenkins-0  -n jenkins-ns -- cat /var/jenkins_home/secrets/initialAdminPassword
+  b92ec6fc4a204730b2d12a997cccd002
 
 http://localhost:30003
-
-admin/admin
-
+admin/admin  
+```
 ### Access to GitHub Repo
 PAT on GitHub / Frontend / Backend for CI
 Repositories:
 ├── Metadata    -> Read-only
-├── Contents    -> Read-only
+├── Contents    -> Read and Write access to code
 └── Webhooks    -> Read-only
 
 ### Add credential to Jenkins
@@ -35,8 +35,72 @@ Fill in:
 - Kind: Username with password
 - Username: your GitHub username
 - Password: your Personal Access Token (which you created earlier)
-- ID: github-credentials
+- ID: github-frontend-cred
 Save
+
+github-frontend-cred   /   github-backend-cred
+```
+### Create nexus-registry secret 
+```
+kubectl create secret docker-registry nexus-registry-secret \
+  --docker-server=nexus-service.nexus-ns.svc.cluster.local:8083 \
+  --docker-username=admin \
+  --docker-password=nexusadmin \
+  -n jenkins-ns
+```
+### Create Docker image based on Alpine OS for the Jenkins Slave
+```
+docker build -t jenkins-inbound-agent-image:latest -f ./kubernetes/jenkins/jenkins-slave/Dockerfile .
+
+# Push to Nexus
+kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
+
+docker login 172.26.13.131:8083 -u admin -p nexusadmin
+docker tag jenkins-inbound-agent-image:latest  172.26.13.131:8083/jenkins-inbound-agent-image:latest 
+docker push 172.26.13.131:8083/jenkins-inbound-agent-image:latest
+```
+#### Create & Configure new Inbound Agent 'Docker-Agent' in Jenkins
+Jenkins > Nodes > jenkins-frontend-inbound-agent > Create
+Fill:
+- Name: jenkins-frontend-inbound-agent  
+- Remote root directory: /home/jenkins  
+- Labels: jenkins-frontend-inbound-agent-label  
+- Launch method: Launch agent by connecting it to the controller  
+Take the secret: secret - (385166e968cf79801280b48b7352753180c8ccbab3f722e4f1ea65ee59d396cd) 
+
+#### Update | Create jenkins-frontend-secret
+
+kubectl apply -f kubernetes/secrets/jenkins-frontend-secret.yaml -n jenkins-ns
+kubectl apply -f kubernetes/jenkins/jenkins-slave -n jenkins-ns
+
+kubectl -n jenkins-ns get all,secrets,svc,configmap
+
+#### Configure Ngrok  
+install ngrok in order to create static IP and proxy to your computer.  
+https://ngrok.com/download/windows?tab=download
+
+registrate  
+
+- run ngrok.exe     
+- ngrok config add-authtoken 3BfhaedAenZ3lAuY3KY5viQIIIF_7ixX7TgMjGArTTt7rFNFb
+- Extra Port Mappings for Jenkins is - 30003
+```
+ngrok http 30003
+
+RES: Forwarding    https://lightless-rocco-climacterically.ngrok-free.dev -> http://localhost:30003  
+```
+#### Configure github webhook that send only Push event notifications
+github > (Reposirory) > settings > webhooks > Add webhook  
+```
+Fill:  
+- Payload URL: <url from ngrok Forwarding> https://lightless-rocco-climacterically.ngrok-free.dev <and> /github-webhook/  
+- Content type: application/json
+- Let me select individual events: Pushes
+- [v] Active  
+```
+### CI Pipeline that builds and pushes a Docker image to Nexus
+Trigger: PUSH → DEV branch  
+#### Configure the Job in Jenkins
 ```
 Dashboard -> ci_frontend_pipeline -> Configure
 Triggers:
@@ -48,3 +112,4 @@ Fill:
 - Credentials → select github-frontend-cred
 - Branch → */DEV
 - Script Path → pipelines/build.Jenkinsfile
+```
