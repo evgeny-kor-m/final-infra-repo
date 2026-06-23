@@ -12,17 +12,17 @@ nodes:
 - role: worker
   image: kindest/node:v1.31.0
   extraPortMappings:
-  - containerPort: 30001      # NodePort of the Service inside the cluster
+  - containerPort: 30001      # (Mongo-express) NodePort of the Service inside the cluster
     hostPort: 30001           # access from browser: http://localhost:30001
     listenAddress: "0.0.0.0"
-  - containerPort: 30002      # NodePort of the second Service inside the cluster
+  - containerPort: 30002      # (Frontend) NodePort of the second Service inside the cluster
     hostPort: 30002           # access from browser: http://localhost:30002
     listenAddress: "0.0.0.0"
 
 - role: worker
   image: kindest/node:v1.31.0
   extraPortMappings:
-  - containerPort: 30003      # NodePort of the Service inside the cluster
+  - containerPort: 30003      # (Jenkins) NodePort of the Service inside the cluster
     hostPort: 30003           # access from browser: http://localhost:30003
     listenAddress: "0.0.0.0"
   - containerPort: 30004      # NodePort of the second Service inside the cluster

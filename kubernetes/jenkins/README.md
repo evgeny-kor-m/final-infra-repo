@@ -19,5 +19,32 @@ http://localhost:30003
 
 admin/admin
 
+### Access to GitHub Repo
+PAT on GitHub / Frontend / Backend for CI
+Repositories:
+├── Metadata    -> Read-only
+├── Contents    -> Read-only
+└── Webhooks    -> Read-only
 
-
+### Add credential to Jenkins
+```
+Dashboard → Manage Jenkins → Credentials
+  ↓
+System → Global credentials → Add Credentials
+Fill in:
+- Kind: Username with password
+- Username: your GitHub username
+- Password: your Personal Access Token (which you created earlier)
+- ID: github-credentials
+Save
+```
+Dashboard -> ci_frontend_pipeline -> Configure
+Triggers:
+[v] GitHub hook trigger for GITScm polling
+Pipeline -> Definition -> Pipeline script from SCM
+Fill:
+- SCM -> Git
+- Repository URL -> https://github.com/evgeny-kor-m/final-frontend-repo.git  
+- Credentials → select github-frontend-cred
+- Branch → */DEV
+- Script Path → pipelines/build.Jenkinsfile
