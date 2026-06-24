@@ -138,3 +138,10 @@ pipeline {
 }
 # Run the Job manually once to re-read the Jenkinsfile
 ```
+
+
+
+#### Test PUSH 
+curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-webhook-trigger/invoke?token=build-token" \
+  -H "Content-Type: application/json" \
+  -d '{"repository":{"name":"final-frontend-repo","clone_url":"https://github.com/evgeny-kor-m/final-frontend-repo.git"},"ref":"refs/heads/DEV","head_commit":{"id":"abc123","message":"test"}}'
