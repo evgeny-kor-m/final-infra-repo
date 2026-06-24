@@ -57,10 +57,11 @@ pipeline {
         stage('# ---- docker version & permission & All cotainers IP ---- #') {
             steps {
                   sh 'docker --version'
-                  sh ''' set +x
-                  sh 'ls -la'
-                  sh 'pwd'
-                  '''
+                  sh '''
+                        set +x
+                        pwd
+                        ls -la
+                    '''
             }
         }
         stage('Build') {

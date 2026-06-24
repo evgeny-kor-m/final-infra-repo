@@ -121,6 +121,7 @@ Fill:
 ```
 #### Build.Jenkinsfile 
 ```
+# All changes in triggers {} need Run the Job manually once to re-read the Jenkinsfile
 pipeline {
     agent { label 'jenkins-frontend-inbound-agent-label' }
     
@@ -136,7 +137,17 @@ pipeline {
         )
     }
 }
-# Run the Job manually once to re-read the Jenkinsfile
+
+# For debuging:
+GitHub Redeliver:
+GitHub -> repo -> Settings -> Webhooks
+-> click webhook -> Recent Deliveries
+-> click delivery -> Redeliver <---- will resend the same payload!
+
+Jenkins API:
+bash# Run the Job via the API
+curl -X POST "http://localhost:30003/job/ci_pipeline/build" \
+--user admin:<api-token>
 ```
 
 
