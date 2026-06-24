@@ -146,8 +146,7 @@ GitHub -> repo -> Settings -> Webhooks
 
 Jenkins API:
 bash# Run the Job via the API
-curl -X POST "http://localhost:30003/job/ci_pipeline/build" \
---user admin:<api-token>
+curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:admin
 ```
 
 

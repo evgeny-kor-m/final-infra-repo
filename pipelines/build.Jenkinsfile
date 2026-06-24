@@ -47,6 +47,16 @@ pipeline {
                 }
             }
         }
+        stage('# ---- docker version & print before Clone ---- #') {
+            steps {
+                  sh 'docker --version'
+                  sh '''
+                        set +x
+                        pwd
+                        ls -la
+                    '''
+            }
+        }
         stage('Clone') {
             steps {
                 git branch: 'DEV',
@@ -54,7 +64,7 @@ pipeline {
                     credentialsId: "${env.GITHUB_CRED}"  // 
             }
         }
-        stage('# ---- docker version & permission & All cotainers IP ---- #') {
+        stage('# ---- docker version & print after Clone ---- #') {
             steps {
                   sh 'docker --version'
                   sh '''
