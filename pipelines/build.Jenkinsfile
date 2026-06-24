@@ -30,7 +30,7 @@ pipeline {
                 [key: 'BRANCH',    value: '$.ref']
             ],
             token: 'build-token',  // token for all
-            causeString: 'Triggered by $REPO_NAME'
+            causeString: 'Triggered by $REPO_NAME',
 
             // filter for push in DEV!
             regexpFilterText: '$BRANCH',
