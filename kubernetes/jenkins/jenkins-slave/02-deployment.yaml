@@ -47,7 +47,7 @@ spec:
           volumeMounts:
           - name: kaniko-secret
             mountPath: /kaniko/.docker/config.json
-            subPath: .dockerconfigjson   # mount like config.json
+            subPath: config.json   # mount like config.json
 
       volumes:
       - name: kaniko-secret

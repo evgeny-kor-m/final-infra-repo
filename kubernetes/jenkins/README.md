@@ -144,6 +144,20 @@ GitHub -> repo -> Settings -> Webhooks
 -> click webhook -> Recent Deliveries
 -> click delivery -> Redeliver <---- will resend the same payload!
 
+curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-webhook-trigger/invoke?token=build-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "repository": {
+      "name": "final-frontend-repo",
+      "clone_url": "https://github.com/evgeny-kor-m/final-frontend-repo.git"
+    },
+    "ref": "refs/heads/DEV",
+    "head_commit": {
+      "id": "02d1cad44533452bd9192b35f4043fab7cfd33ff",
+      "message": "test"
+    }
+  }'
+
 Run the Job via the Jenkins API:
 Jenkins UI → admin → Security → API Token → Add new Token
 → copy <api-token>
@@ -152,7 +166,4 @@ curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf
 
 
 
-#### Test PUSH 
-curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-webhook-trigger/invoke?token=build-token" \
-  -H "Content-Type: application/json" \
-  -d '{"repository":{"name":"final-frontend-repo","clone_url":"https://github.com/evgeny-kor-m/final-frontend-repo.git"},"ref":"refs/heads/DEV","head_commit":{"id":"abc123","message":"test"}}'
+

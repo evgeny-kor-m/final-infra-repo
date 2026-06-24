@@ -16,6 +16,8 @@ COPY --from=gcr.io/kaniko-project/executor:latest /kaniko /kaniko
 ENV PATH=$PATH:/kaniko
 
 # Create kaniko dir
-RUN mkdir -p /kaniko/.docker
+# Fix permissions for jenkins user
+RUN mkdir -p /kaniko/.docker && \
+    chown -R jenkins:jenkins /kaniko  
 
 USER jenkins
