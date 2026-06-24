@@ -49,7 +49,6 @@ pipeline {
         }
         stage('# ---- docker version & print before Clone ---- #') {
             steps {
-                  sh 'docker --version'
                   sh '''
                         set +x
                         pwd
@@ -66,7 +65,6 @@ pipeline {
         }
         stage('# ---- docker version & print after Clone ---- #') {
             steps {
-                  sh 'docker --version'
                   sh '''
                         set +x
                         pwd
@@ -74,15 +72,16 @@ pipeline {
                     '''
             }
         }
-        stage('Build') {
+        stage('Build & Push') {
             steps {
-                sh "docker build -t nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} ."
-            }
-        }
-        stage('Push') {
-            steps {
-                sh "docker push nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}"
-            }
+                sh """
+                        /kaniko/executor \
+                            --context . \
+                            --dockerfile Dockerfile \
+                            --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \
+                            --insecure \
+                            --skip-tls-verify
+                    """
         }
     }
 }

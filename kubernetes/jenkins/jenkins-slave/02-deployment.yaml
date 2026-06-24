@@ -43,3 +43,16 @@ spec:
                 key: JENKINS_AGENT_NAME   
           - name: JENKINS_TUNNEL          
             value: "jenkins-service:50000" # jnlp port Jenkins master
+          
+          volumeMounts:
+          - name: kaniko-secret
+            mountPath: /kaniko/.docker/config.json
+            subPath: .dockerconfigjson   # mount like config.json
+
+      volumes:
+      - name: kaniko-secret
+        secret:
+          secretName: nexus-registry-secret
+          items:
+          - key: .dockerconfigjson
+            path: config.json

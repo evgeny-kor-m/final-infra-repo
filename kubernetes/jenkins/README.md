@@ -144,9 +144,10 @@ GitHub -> repo -> Settings -> Webhooks
 -> click webhook -> Recent Deliveries
 -> click delivery -> Redeliver <---- will resend the same payload!
 
-Jenkins API:
-bash# Run the Job via the API
-curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:admin
+Run the Job via the Jenkins API:
+Jenkins UI → admin → Security → API Token → Add new Token
+→ copy <api-token>
+curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733  <api-token>
 ```
 
 
