@@ -1,23 +1,3 @@
-/** 
-* Part 2 – CI Pipeline on Infrastructure Server
-*/
-// pipeline {
-//     agent { label 'jenkins-frontend-inbound-agent-label' }
-//     environment {    
-//              GITHUB_CRED = credentials('github-frontend-cred')
-//              }
-//     stages {
-//         stage('# ---- Prepare GIT_COMMIT_MSG & GIT_REPO ---- #') {
-//             steps {
-//                 script {
-//                     env.GIT_COMMIT_MSG = sh(script: "git log -1 --pretty=%B ${env.GIT_COMMIT}", returnStdout: true).trim()
-//                     env.GIT_REPO = sh(script: "echo ${env.GIT_URL} | sed 's|https://github.com/||' | sed 's|\\.git||'", returnStdout: true).trim()
-//                 }
-//             }
-//         }
-//     }
-// }
-
 pipeline {
     agent { label 'jenkins-frontend-inbound-agent-label' }
     
@@ -35,8 +15,8 @@ pipeline {
             causeString: 'Triggered by $REPO_NAME',
 
             // filter for push in DEV!
-            regexpFilterText: '$BRANCH',
-            regexpFilterExpression: 'refs/heads/DEV'
+            regexpFilterText: '$BRANCH $REPO_NAME',
+            regexpFilterExpression: 'refs/heads/DEV (final-frontend-repo|final-backend-repo)'
         )
     }
     stages {
@@ -54,14 +34,34 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    // 
+                    // determine IMAGE_NAME and credentialsId based on repo name
                     if (env.REPO_NAME == 'final-frontend-repo') {
                         env.IMAGE_NAME = 'frontend-image'
+                        env.GITHUB_CRED = 'github-frontend-cred'
                     } else if (env.REPO_NAME == 'final-backend-repo') {
                         env.IMAGE_NAME = 'backend-image'
+                        env.GITHUB_CRED = 'github-backend-cred'
                     }
                     echo "Building: ${env.IMAGE_NAME} from ${env.REPO_URL}"
+                    echo "Using credentials: ${env.GITHUB_CRED}"
                 }
+            }
+        }
+        stage('Clone') {
+            steps {
+                git branch: 'DEV',
+                    url: "${env.REPO_URL}",
+                    credentialsId: "${env.GITHUB_CRED}"  // 
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "docker build -t nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} ."
+            }
+        }
+        stage('Push') {
+            steps {
+                sh "docker push nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}"
             }
         }
     }

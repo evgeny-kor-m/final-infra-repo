@@ -120,35 +120,21 @@ Fill:
 - Script Path -> pipelines/build.Jenkinsfile
 ```
 #### Build.Jenkinsfile 
+```
 pipeline {
     agent { label 'jenkins-frontend-inbound-agent-label' }
     
     triggers {
         GenericTrigger(
             genericVariables: [
-                // извлекаем имя репо из webhook payload
                 [key: 'REPO_NAME', value: '$.repository.name'],
                 [key: 'REPO_URL',  value: '$.repository.clone_url'],
                 [key: 'BRANCH',    value: '$.ref']
             ],
-            token: 'build-token',  // один токен для всех!
+            token: 'build-token',  
             causeString: 'Triggered by $REPO_NAME'
         )
     }
-    stages {
-        stage('Prepare') {
-            steps {
-                script {
-                    // определяем IMAGE_NAME из имени репо
-                    if (env.REPO_NAME == 'final-frontend-repo') {
-                        env.IMAGE_NAME = 'frontend-image'
-                    } else if (env.REPO_NAME == 'final-backend-repo') {
-                        env.IMAGE_NAME = 'backend-image'
-                    }
-                    echo "Building: ${env.IMAGE_NAME} from ${env.REPO_URL}"
-                }
-            }
-        }
-    }
 }
-
+# Run the Job manually once to re-read the Jenkinsfile
+```
