@@ -72,7 +72,9 @@ Take the secret: secret - (385166e968cf79801280b48b7352753180c8ccbab3f722e4f1ea6
 #### Update | Create jenkins-frontend-secret
 
 kubectl apply -f kubernetes/secrets/jenkins-frontend-secret.yaml -n jenkins-ns
+
 kubectl apply -f kubernetes/jenkins/jenkins-slave -n jenkins-ns
+kubectl rollout restart deployment/jenkins-frontend-agent -n jenkins-ns
 
 kubectl -n jenkins-ns get all,secrets,svc,configmap
 
@@ -143,7 +145,7 @@ GitHub Redeliver:
 GitHub -> repo -> Settings -> Webhooks
 -> click webhook -> Recent Deliveries
 -> click delivery -> Redeliver <---- will resend the same payload!
-
+# same request
 curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-webhook-trigger/invoke?token=build-token" \
   -H "Content-Type: application/json" \
   -d '{
