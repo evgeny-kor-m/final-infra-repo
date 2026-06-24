@@ -54,6 +54,16 @@ pipeline {
                     credentialsId: "${env.GITHUB_CRED}"  // 
             }
         }
+        stage('# ---- docker version & permission & All cotainers IP ---- #') {
+            steps {
+                  sh 'docker --version'
+                  sh 'docker ps'
+                  sh ''' set +x
+                  sh 'ls -la'
+                  sh 'pwd'
+                  '''
+            }
+        }
         stage('Build') {
             steps {
                 sh "docker build -t nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} ."
