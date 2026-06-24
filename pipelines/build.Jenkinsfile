@@ -75,6 +75,17 @@ pipeline {
         stage('Build & Push') {
             steps {
                 sh """
+
+                    echo "=== config.json content ==="
+                    cat /kaniko/.docker/config.json
+            
+                    echo "=== whoami ==="
+                    whoami
+            
+                    echo "=== test auth to nexus ==="
+                    curl -v -u admin:nexusadmin \
+                    http://nexus-service.nexus-ns.svc.cluster.local:8083/v2/
+                    
                         /kaniko/executor \
                             --context . \
                             --dockerfile Dockerfile \
