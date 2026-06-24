@@ -5,9 +5,11 @@ __pycache__/
 
 # C extensions
 *.so
+# key
+.key
 
 # k8s
-**/secret.yaml
+**/*secret.yaml
 
 # Distribution / packaging
 .Python

@@ -20,14 +20,14 @@ spec:
       containers:
       - name: mongodb
         image: mongo:latest
+        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
         command:
         - mongod
-        - "--replSet"                # enable Replica Set mode
-        - "rs0"                      # replica set name — must match Job
-        - "--bind_ip_all"            # accept connections from all IPs inside cluster
-        # - "--auth"                   # enable authentication
-        # - "--keyFile=/etc/mongodb/keyfile"  # required when --auth + --replSet are used together
-        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
+        - "--replSet"                       # enable Replica Set mode
+        - "rs0"                             # replica set name — must match Job
+        - "--bind_ip_all"                   # accept connections from all IPs inside cluster
+        - "--auth"                          # enable authentication
+        - "--keyFile=/etc/mongodb/keyfile"  # required when --auth + --replSet are used together
         ports:
           - containerPort: 27017            # default MongoDB port
         volumeMounts:
@@ -54,26 +54,24 @@ spec:
         readinessProbe:                     # checks if pod is ready to receive traffic
           exec:
             command:
-            - bash
-            - -c
-            - |
-              mongosh --eval "db.adminCommand('ping')" --quiet ||
-              mongosh -u admin -p passw --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
-          initialDelaySeconds: 30           # wait 30s after start before first check
-          periodSeconds: 10                 # check every 10s
-          timeoutSeconds: 5                 # fail if no response in 5s
-          successThreshold: 1               # 1 success = ready
-          failureThreshold: 6               # 6 failures = not ready, remove from Service
+              - mongosh
+              - --eval
+              - "db.adminCommand('ping')"
+          initialDelaySeconds: 5           # wait 5s after start before first check
+          periodSeconds: 5                 # check every 5s
+          timeoutSeconds: 3                # fail if no response in 3s
+          successThreshold: 1              # 1 success = ready
+          failureThreshold: 6              # 6 failures = not ready, remove from Service
 
       volumes:
       - name: mongodb-keyfile               # shared secret key for inter-node auth in Replica Set
         secret:
           secretName: mongodb-secret
+          defaultMode: 0400                 # MongoDB requires strict 400 permissions on keyFile
           items:
           - key: keyfile
             path: keyfile
-            mode: 0400                      # MongoDB requires strict 400 permissions on keyFile
-
+                    
   volumeClaimTemplates:                     # auto-creates PVC for each pod
   - metadata:
       name: mongodb-vol

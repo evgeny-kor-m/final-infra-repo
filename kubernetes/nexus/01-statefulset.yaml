@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexus
+  namespace: nexus-ns
+  labels:
+    app: nexus-srv
+spec:
+  replicas: 1                          # 3 pods for Replica Set
+  selector:
+    matchLabels:
+      app: nexus-srv
+  template:
+    metadata:
+      labels:
+        app: nexus-srv
+    spec:
+      containers:
+      - name: nexus
+        image: sonatype/nexus3:latest
+        imagePullPolicy: IfNotPresent       # use local image if exists, skip pulling
+        ports:
+          - containerPort: 8081             # default UI Nexus port
+          - containerPort: 8083             # Docker registry
+        volumeMounts:
+          - mountPath: /nexus-data          # persistent data storage
+            name: nexus-vol
+             
+  volumeClaimTemplates:                     # auto-creates PVC for pod
+  - metadata:
+      name: nexus-vol                     
+    spec:
+      accessModes: [ "ReadWriteOnce" ]      # single node read-write
+      resources:
+        requests:
+          storage: 1Gi                    # 10Gi , 500Mi

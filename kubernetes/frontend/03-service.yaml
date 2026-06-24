@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: frontend
+spec:
+  type: NodePort
+  ports:
+  - port: 3000                  # the port of the Service itself within the cluster. Other pods access this port.
+    targetPort: 3000            # the port inside the Container to which traffic is forwarded. Must match the containerPort in the Deployment.
+    nodePort: 30002             # the port on the K8s node accessible from outside.
+  selector:
+    app: frontend-app
