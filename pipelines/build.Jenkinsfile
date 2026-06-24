@@ -80,7 +80,8 @@ pipeline {
                             --dockerfile Dockerfile \
                             --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \
                             --insecure \
-                            --skip-tls-verify
+                            --skip-tls-verify \
+                            --force
                     """
             }
         }
