@@ -57,7 +57,6 @@ pipeline {
         stage('# ---- docker version & permission & All cotainers IP ---- #') {
             steps {
                   sh 'docker --version'
-                  sh 'docker ps'
                   sh ''' set +x
                   sh 'ls -la'
                   sh 'pwd'
