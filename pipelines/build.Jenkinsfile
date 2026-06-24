@@ -27,7 +27,9 @@ pipeline {
                 // fetch data from webhook payload
                 [key: 'REPO_NAME', value: '$.repository.name'],
                 [key: 'REPO_URL',  value: '$.repository.clone_url'],
-                [key: 'BRANCH',    value: '$.ref']
+                [key: 'BRANCH',    value: '$.ref'],
+                [key: 'COMMIT_SHA',     value: '$.head_commit.id'],      // SHA commit
+                [key: 'COMMIT_MESSAGE', value: '$.head_commit.message']
             ],
             token: 'build-token',  // token for all
             causeString: 'Triggered by $REPO_NAME',
@@ -38,6 +40,17 @@ pipeline {
         )
     }
     stages {
+        stage('# ---- print variables from Generic Webhook Plugin---- #') {
+            steps {
+                sh """ set +x
+                    echo "REPO_NAME: ${env.REPO_NAME}"
+                    echo "REPO_URL: ${env.REPO_URL}"
+                    echo "BRANCH: ${env.BRANCH}"
+                    echo "COMMIT_SHA:  ${env.COMMIT_SHA}"
+                    echo "COMMIT_MESSAGE: ${env.COMMIT_MESSAGE}"
+                """
+            }
+        }
         stage('Prepare') {
             steps {
                 script {
