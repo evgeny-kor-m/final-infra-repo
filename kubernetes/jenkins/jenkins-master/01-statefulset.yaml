@@ -19,7 +19,8 @@ spec:
       # serviceAccountName: jenkins-admin
       containers:
         - name: jenkins
-          image: jenkins/jenkins:lts
+          image: jenkins/jenkins:lts-jdk21
+          imagePullPolicy: Always
           # resources:
           #   limits:
           #     memory: "2Gi"

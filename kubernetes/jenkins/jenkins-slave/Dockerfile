@@ -1,4 +1,4 @@
-FROM jenkins/inbound-agent:latest-alpine-jdk17
+FROM jenkins/inbound-agent:latest-alpine-jdk21
 
 USER root
 

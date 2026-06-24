@@ -12,6 +12,7 @@ https://devopscube.com/setup-jenkins-on-kubernetes-cluster/
 # Run
 ```
   kubectl apply -f kubernetes/jenkins/jenkins-master -n jenkins-ns
+  kubectl rollout restart statefulset/jenkins -n jenkins-ns
 
   kubectl exec jenkins-0  -n jenkins-ns -- cat /var/jenkins_home/secrets/initialAdminPassword
   b92ec6fc4a204730b2d12a997cccd002
@@ -38,7 +39,7 @@ Fill in:
 - ID: github-frontend-cred
 Save
 
-github-frontend-cred   /   github-backend-cred
+github-frontend-cred   /   github-backend-cred   /   github-infra-cred
 ```
 ### Create nexus-registry secret 
 ```
@@ -89,27 +90,65 @@ ngrok http 30003
 
 RES: Forwarding    https://lightless-rocco-climacterically.ngrok-free.dev -> http://localhost:30003  
 ```
-#### Configure github webhook that send only Push event notifications
+#### Configure github webhook on Push event for frontend/backend repo
 github > (Reposirory) > settings > webhooks > Add webhook  
 ```
 Fill:  
-- Payload URL: <url from ngrok Forwarding> https://lightless-rocco-climacterically.ngrok-free.dev <and> /github-webhook/  
+- Payload URL: <url from ngrok Forwarding> https://lightless-rocco-climacterically.ngrok-free.dev <and> /generic-webhook-trigger/ <and> /invoke?token=build-token
 - Content type: application/json
 - Let me select individual events: Pushes
 - [v] Active  
+
 ```
+#### Generic Webhook Trigger Plugin:
+Manage Jenkins → Plugins → Generic Webhook Trigger
+
 ### CI Pipeline that builds and pushes a Docker image to Nexus
 Trigger: PUSH → DEV branch  
 #### Configure the Job in Jenkins
+build_and_push_pipeline to catch webhook only 
 ```
-Dashboard -> ci_frontend_pipeline -> Configure
+Dashboard -> ci_pipeline -> Configure
 Triggers:
-[v] GitHub hook trigger for GITScm polling
+[ ] - clean - not selected nothing
 Pipeline -> Definition -> Pipeline script from SCM
 Fill:
 - SCM -> Git
-- Repository URL -> https://github.com/evgeny-kor-m/final-frontend-repo.git  
-- Credentials → select github-frontend-cred
-- Branch → */DEV
-- Script Path → pipelines/build.Jenkinsfile
+- Repository URL -> https://github.com/evgeny-kor-m/final-infra-repo.git  
+- Credentials -> select (github-infra-cred)    
+- Branch -> */main
+- Script Path -> pipelines/build.Jenkinsfile
 ```
+#### Build.Jenkinsfile 
+pipeline {
+    agent { label 'jenkins-frontend-inbound-agent-label' }
+    
+    triggers {
+        GenericTrigger(
+            genericVariables: [
+                // извлекаем имя репо из webhook payload
+                [key: 'REPO_NAME', value: '$.repository.name'],
+                [key: 'REPO_URL',  value: '$.repository.clone_url'],
+                [key: 'BRANCH',    value: '$.ref']
+            ],
+            token: 'build-token',  // один токен для всех!
+            causeString: 'Triggered by $REPO_NAME'
+        )
+    }
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    // определяем IMAGE_NAME из имени репо
+                    if (env.REPO_NAME == 'final-frontend-repo') {
+                        env.IMAGE_NAME = 'frontend-image'
+                    } else if (env.REPO_NAME == 'final-backend-repo') {
+                        env.IMAGE_NAME = 'backend-image'
+                    }
+                    echo "Building: ${env.IMAGE_NAME} from ${env.REPO_URL}"
+                }
+            }
+        }
+    }
+}
+
