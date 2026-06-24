@@ -82,6 +82,7 @@ pipeline {
                             --insecure \
                             --skip-tls-verify
                     """
+            }
         }
     }
 }
