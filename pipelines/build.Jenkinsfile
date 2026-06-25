@@ -72,6 +72,8 @@ pipeline {
                         echo "=== workspace content ==="
                         ls -la
                         
+                        rm -rf /tmp/build_context
+                        
                         echo "=== copying to /tmp ==="
                         cp -r \$(pwd) /tmp/build_context
                         
