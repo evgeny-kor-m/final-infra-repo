@@ -8,16 +8,12 @@ metadata:
   namespace: jenkins-ns
 spec:
   containers:
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:debug
-    command: [sleep]
-    args: ["infinity"]
+  - name: jnlp
+    image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json
       subPath: config.json
-  - name: jnlp
-    image: jenkins/inbound-agent:latest-alpine-jdk21
   volumes:
   - name: kaniko-secret
     secret:
