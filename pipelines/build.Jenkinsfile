@@ -85,10 +85,10 @@ pipeline {
                     """
             }
         }
-        stage('Cleanup') {
-            steps {
-                sh 'kill 1 || true'
-            }
-        }
+        // stage('Cleanup') {
+        //     steps {
+        //         sh 'kill 1 || true'
+        //     }
+        // }
     }
 }
