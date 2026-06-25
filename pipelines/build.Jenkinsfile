@@ -83,23 +83,24 @@ pipeline {
 
                         /kaniko/executor \
                             --context /tmp/build_context \
-                            --dockerfile Dockerfile \
+                            --dockerfile /tmp/build_context/Dockerfile \
                             --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \
                             --insecure \
                             --skip-tls-verify \
                             --cache=true \
                             --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \
                             --snapshot-mode=redo
+
+                        # Kill pod AFTER build — k8s will recreate fresh one
+                        kill 1 || true
                     """
             }
         }
     }
-    post{
-        always {
-            script {
-                    // Kill pod after build — k8s will recreate fresh one
-                    sh 'kill 1 || true'
-                }
-            }
-        }
+    // post{
+    //     always {
+    //                 // Kill pod after build — k8s will recreate fresh one
+    //                 sh 'kill 1 || true'
+    //         }
+    //     }
 }
