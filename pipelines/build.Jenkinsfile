@@ -1,7 +1,6 @@
 pipeline {
     agent { label 'jenkins-frontend-inbound-agent-label' }
-    options {
-        timeout(time: 5, unit: 'MINUTES') }
+    options { timeout(time: 5, unit: 'MINUTES') }
     triggers {
         GenericTrigger(
             genericVariables: [
@@ -48,29 +47,20 @@ pipeline {
                 }
             }
         }
-        stage('# ---- docker version & print before Clone ---- #') {
-            steps {
-                  sh '''
-                        set +x
-                        pwd
-                        ls -la
-                    '''
-            }
-        }
+        // stage('# ---- docker version & print before Clone ---- #') {
+        //     steps {
+        //           sh '''
+        //                 set +x
+        //                 pwd
+        //                 ls -la
+        //             '''
+        //     }
+        // }
         stage('Clone') {
             steps {
                 git branch: 'DEV',
                     url: "${env.REPO_URL}",
                     credentialsId: "${env.GITHUB_CRED}"  // 
-            }
-        }
-        stage('# ---- docker version & print after Clone ---- #') {
-            steps {
-                  sh '''
-                        set +x
-                        pwd
-                        ls -la
-                    '''
             }
         }
         stage('Build & Push') {
@@ -86,7 +76,8 @@ pipeline {
                             --skip-tls-verify \
                             --force \
                             --cache=true \
-                            --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache
+                            --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \
+                            --snapshot-mode=redo
                     """
             }
         }
