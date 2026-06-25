@@ -51,7 +51,7 @@ pipeline {
             steps {
                 git branch: 'DEV',
                     url: "${env.REPO_URL}",
-                    credentialsId: "${env.GITHUB_CRED}"  // 
+                    credentialsId: "${env.GITHUB_CRED}"
             }
         }
         stage('Build & Push') {
