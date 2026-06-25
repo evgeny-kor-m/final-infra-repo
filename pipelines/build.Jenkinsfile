@@ -93,7 +93,7 @@ pipeline {
                     """
             }
         }
-        post {
+        post{
             always {
                 script {
                     // Kill pod after build — k8s will recreate fresh one
