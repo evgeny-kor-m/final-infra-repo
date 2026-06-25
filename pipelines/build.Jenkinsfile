@@ -68,13 +68,15 @@ pipeline {
                 sh """
                     export DOCKER_CONFIG=/kaniko/.docker
 
+                        # Copy to a separate folder outside the workspace
+                        cp -r \$(pwd) /tmp/build_context
+
                         /kaniko/executor \
-                            --context . \
+                            --context /tmp/build_context \
                             --dockerfile Dockerfile \
                             --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \
                             --insecure \
                             --skip-tls-verify \
-                            --force \
                             --cache=true \
                             --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \
                             --snapshot-mode=redo

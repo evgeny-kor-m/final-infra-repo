@@ -219,8 +219,10 @@ stage('Build & Push') {
                 --insecure \                     # use HTTP instead of HTTPS
                 --skip-tls-verify \              # skip TLS verification
                 --force \                        # force build outside container
+      #---------optimizations----------------------------------------------------------------------------------------------------------------------          
                 --cache=true \                   # enable layer caching (improving speed / reducing build time)
-                --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache  # cache storage  (improving speed / reducing build time)
+                --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \  # cache storage  (improving speed / reducing build time)
+                --snapshot-mode=redo             # [full] - checks ALL files, slow but accurate. [redo] - checks only modified files, faster
         """
     }
 }
