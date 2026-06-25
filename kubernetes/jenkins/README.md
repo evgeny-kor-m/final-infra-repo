@@ -211,14 +211,17 @@ stage('Build & Push') {
             # Set Docker config path for Kaniko credentials (to allow Kaniko read config.json)
             export DOCKER_CONFIG=/kaniko/.docker
 
+            # Copy to a separate folder outside the workspace for kaniko, because kaniko destroy filesystem
+            cp -r \$(pwd) /tmp/build_context
+
             # Build and push image to Nexus
             /kaniko/executor \
+                --context /tmp/build_context \   # workspace for kaniko
                 --context . \                    # build context = current directory
                 --dockerfile Dockerfile \        # Dockerfile location
                 --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \  # image:tag
                 --insecure \                     # use HTTP instead of HTTPS
                 --skip-tls-verify \              # skip TLS verification
-                --force \                        # force build outside container
       #---------optimizations----------------------------------------------------------------------------------------------------------------------          
                 --cache=true \                   # enable layer caching (improving speed / reducing build time)
                 --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \  # cache storage  (improving speed / reducing build time)
