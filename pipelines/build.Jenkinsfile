@@ -93,13 +93,13 @@ pipeline {
                     """
             }
         }
-        post{
-            always {
-                script {
+    }
+    post{
+        always {
+            script {
                     // Kill pod after build — k8s will recreate fresh one
                     sh 'kill 1 || true'
                 }
             }
         }
-    }
 }
