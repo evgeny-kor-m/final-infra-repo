@@ -1,6 +1,7 @@
 pipeline {
     agent { label 'jenkins-frontend-inbound-agent-label' }
-    
+    options {
+        timeout(time: 5, unit: 'MINUTES') }
     triggers {
         GenericTrigger(
             genericVariables: [
