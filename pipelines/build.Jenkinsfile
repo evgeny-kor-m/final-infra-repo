@@ -1,32 +1,31 @@
 pipeline {
     agent {
         kubernetes {
-            label 'jenkins-build-agent'  
             yaml """
 apiVersion: v1
 kind: Pod
 metadata:
-namespace: jenkins-ns
+  namespace: jenkins-ns
 spec:
-containers:
-- name: kaniko
-    image: gcr.io/kaniko-project/executor:latest
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
     command: [sleep]
     args: ["infinity"]
     volumeMounts:
     - name: kaniko-secret
-    mountPath: /kaniko/.docker/config.json
-    subPath: config.json
-- name: jnlp
+      mountPath: /kaniko/.docker/config.json
+      subPath: config.json
+  - name: jnlp
     image: jenkins/inbound-agent:latest-alpine-jdk21
-volumes:
-- name: kaniko-secret
+  volumes:
+  - name: kaniko-secret
     secret:
-    secretName: nexus-registry-secret
-    items:
-    - key: .dockerconfigjson
+      secretName: nexus-registry-secret
+      items:
+      - key: .dockerconfigjson
         path: config.json
-            """
+"""
                 }
      }
     
