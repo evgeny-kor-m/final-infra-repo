@@ -47,15 +47,6 @@ pipeline {
                 }
             }
         }
-        // stage('# ---- docker version & print before Clone ---- #') {
-        //     steps {
-        //           sh '''
-        //                 set +x
-        //                 pwd
-        //                 ls -la
-        //             '''
-        //     }
-        // }
         stage('Clone') {
             steps {
                 git branch: 'DEV',
@@ -98,10 +89,5 @@ pipeline {
                 sh 'kill 1 || true'
             }
         }
-    // post{
-    //     always {
-    //                 // Kill pod after build — k8s will recreate fresh one
-    //                 sh 'kill 1 || true'
-    //         }
-    //     }
+    }
 }
