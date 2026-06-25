@@ -1,5 +1,36 @@
 pipeline {
-    agent { label 'jenkins-frontend-inbound-agent-label' }
+    agent { 
+        label 'jenkins-build-agent'  
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            metadata:
+            namespace: jenkins-ns
+            spec:
+            containers:
+            - name: kaniko
+                image: gcr.io/kaniko-project/executor:latest
+                command: [sleep]
+                args: ["infinity"]
+                volumeMounts:
+                - name: kaniko-secret
+                mountPath: /kaniko/.docker/config.json
+                subPath: config.json
+            - name: jnlp
+                image: jenkins/inbound-agent:latest-alpine-jdk21
+            volumes:
+            - name: kaniko-secret
+                secret:
+                secretName: nexus-registry-secret
+                items:
+                - key: .dockerconfigjson
+                    path: config.json
+            """
+                }
+     }
+    
+    
     options { timeout(time: 5, unit: 'MINUTES') }
     triggers {
         GenericTrigger(

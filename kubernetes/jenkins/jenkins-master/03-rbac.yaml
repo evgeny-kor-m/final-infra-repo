@@ -1,0 +1,32 @@
+# Role-Based Access Control
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-admin
+  namespace: jenkins-ns
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jenkins-agent-role
+  namespace: jenkins-ns
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/exec", "pods/log", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "delete", "update"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-agent-binding
+  namespace: jenkins-ns
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-admin
+    namespace: jenkins-ns
+roleRef:
+  kind: Role
+  name: jenkins-agent-role
+  apiGroup: rbac.authorization.k8s.io

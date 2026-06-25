@@ -107,7 +107,8 @@ Manage Jenkins → Plugins → Generic Webhook Trigger
 
 ### CI Pipeline that builds and pushes a Docker image to Nexus
 Trigger: PUSH → DEV branch  
-#### Configure the Job in Jenkins
+
+<!-- #### Configure the Job in Jenkins
 build_and_push_pipeline to catch webhook only 
 ```
 Dashboard -> ci_pipeline -> Configure
@@ -120,7 +121,49 @@ Fill:
 - Credentials -> select (github-infra-cred)    
 - Branch -> */main
 - Script Path -> pipelines/build.Jenkinsfile
-```
+``` -->
+#### Kubernetes with Jenkins Dynamic Agents
+Dynamic Agents: Agents are Kubernetes pods that vanish after jobs finish. No more paying for idle VMs!
+Auto-Scaling: Need 10 agents at 2 PM and zero at 2 AM? Kubernetes handles it.
+Consistent Environments: Every job runs in a fresh, Dockerized workspace.   
+#### Connect Jenkins to Kubernetes
+Jenkins configurations:  
+Manage Jenkins → Nodes → Built-In Node → Configure
+→ Number of executors: 0   
+→ Save
+
+- Manage Jenkins → Plugins → Available  
+  → install 'Kubernetes' Plugin  
+  → Restart Jenkins  
+
+Prerequisites & Cluster RBAC:  
+Jenkins needs explicit permissions to interact with your cluster's API to spin up and terminate agent pods.Create a service account, role, and role binding inside your dedicated Jenkins namespace
+
+Configure Jenkins Cloud Provider:  
+Jenkins → kube-kind (Cloud) → Kubernetes API
+- Manage Jenkins > Clouds > New Cloud.
+  → Type: Kubernetes
+  → Kubernetes URL: https://kubernetes.default.svc
+  → Kubernetes Namespace: jenkins-ns
+  → Jenkins URL: http://jenkins-service.jenkins-ns.svc.cluster.local:8080
+  → Jenkins tunnel: jenkins-service.jenkins-ns.svc.cluster.local:50000
+  → Test Connection  -> Connected to Kubernetes v1.31.0
+  → Restart Jenkins
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### Build.Jenkinsfile 
 ```
 # All changes in triggers {} need Run the Job manually once to re-read the Jenkinsfile
@@ -166,6 +209,7 @@ Jenkins UI → admin → Security → API Token → Add new Token
 → copy <api-token>
 curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733  <api-token>
 ```
+
 ##### Using Kaniko instead Docker for build and pushing image
 Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access. It runs inside a container (for example, in a Kubernetes pod), making it ideal for secure CI/CD environments.   
 
@@ -222,7 +266,7 @@ stage('Build & Push') {
                 --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \  # image:tag
                 --insecure \                     # use HTTP instead of HTTPS
                 --skip-tls-verify \              # skip TLS verification
-      #---------optimizations----------------------------------------------------------------------------------------------------------------------          
+        #---------optimizations----------------------------------------------------------------------------------------------------------------------          
                 --cache=true \                   # enable layer caching (improving speed / reducing build time)
                 --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \  # cache storage  (improving speed / reducing build time)
                 --snapshot-mode=redo             # [full] - checks ALL files, slow but accurate. [redo] - checks only modified files, faster
