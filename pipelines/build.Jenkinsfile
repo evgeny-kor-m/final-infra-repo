@@ -69,7 +69,17 @@ pipeline {
                     export DOCKER_CONFIG=/kaniko/.docker
 
                         # Copy to a separate folder outside the workspace
+                        echo "=== workspace content ==="
+                        ls -la
+                        
+                        echo "=== copying to /tmp ==="
                         cp -r \$(pwd) /tmp/build_context
+                        
+                        echo "=== /tmp/build_context content ==="
+                        ls -la /tmp/build_context
+                        
+                        echo "=== requirements.txt exists? ==="
+                        ls -la /tmp/build_context/requirements.txt || echo "NOT FOUND!"
 
                         /kaniko/executor \
                             --context /tmp/build_context \
