@@ -1,12 +1,14 @@
 pipeline {
     agent {
         kubernetes {
-            yaml """
+        yaml """
 apiVersion: v1
 kind: Pod
 metadata:
   namespace: jenkins-ns
 spec:
+  imagePullSecrets:
+  - name: nexus-registry-secret
   containers:
   - name: jnlp
     image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
