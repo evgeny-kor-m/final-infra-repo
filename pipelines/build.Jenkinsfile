@@ -78,6 +78,7 @@ pipeline {
                             --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \
                             --insecure \
                             --skip-tls-verify \
+                            --use-new-run \
                             --cache=true \
                             --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \
                             --snapshot-mode=redo
