@@ -166,7 +166,65 @@ Jenkins UI → admin → Security → API Token → Add new Token
 → copy <api-token>
 curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733  <api-token>
 ```
+##### Using Kaniko instead Docker for build and pushing image
+Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access. It runs inside a container (for example, in a Kubernetes pod), making it ideal for secure CI/CD environments.   
 
+In Dockerfile agent:   
+```
+# Copy Kaniko executor from official image
+COPY --from=gcr.io/kaniko-project/executor:latest /kaniko /kaniko
+
+ENV PATH=$PATH:/kaniko
+
+# Create kaniko dir and fix permissions for root
+RUN mkdir -p /kaniko/.docker && \
+    chmod -R 777 /kaniko
+```
+Use nexus-registry-secret providing kaniko Nexus credentials:
+```
+kubectl create secret docker-registry nexus-registry-secret \
+  --docker-server=nexus-service.nexus-ns.svc.cluster.local:8083 \
+  --docker-username=admin \
+  --docker-password=nexusadmin \
+  -n jenkins-ns
+```
+Deployment agent - mounted config.json:
+```
+volumeMounts:
+- name: kaniko-secret
+  mountPath: /kaniko/.docker/config.json
+  subPath: config.json
+
+volumes:
+- name: kaniko-secret
+  secret:
+    secretName: nexus-registry-secret
+    items:
+    - key: .dockerconfigjson
+      path: config.json
+```
+Jenkinsfile :
+```
+stage('Build & Push') {
+    steps {
+        sh """
+            # Set Docker config path for Kaniko credentials (to allow Kaniko read config.json)
+            export DOCKER_CONFIG=/kaniko/.docker
+
+            # Build and push image to Nexus
+            /kaniko/executor \
+                --context . \                    # build context = current directory
+                --dockerfile Dockerfile \        # Dockerfile location
+                --destination nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA} \  # image:tag
+                --insecure \                     # use HTTP instead of HTTPS
+                --skip-tls-verify \              # skip TLS verification
+                --force \                        # force build outside container
+                --cache=true \                   # enable layer caching (improving speed / reducing build time)
+                --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache  # cache storage  (improving speed / reducing build time)
+        """
+    }
+}
+```
 
 
 
