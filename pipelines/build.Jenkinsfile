@@ -72,8 +72,6 @@ pipeline {
                         echo "=== workspace content ==="
                         ls -la
                         
-                        rm -rf /tmp/build_context
-                        
                         echo "=== copying to /tmp ==="
                         cp -r \$(pwd) /tmp/build_context
                         
@@ -93,6 +91,14 @@ pipeline {
                             --cache-repo=nexus-service.nexus-ns.svc.cluster.local:8083/kaniko-cache \
                             --snapshot-mode=redo
                     """
+            }
+        }
+        post {
+            always {
+                script {
+                    // Kill pod after build — k8s will recreate fresh one
+                    sh 'kill 1 || true'
+                }
             }
         }
     }
