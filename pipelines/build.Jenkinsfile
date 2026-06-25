@@ -28,7 +28,7 @@ spec:
      }
     
     
-    options { timeout(time: 5, unit: 'MINUTES') }
+    options { timeout(time: 10, unit: 'MINUTES') }
     triggers {
         GenericTrigger(
             genericVariables: [
