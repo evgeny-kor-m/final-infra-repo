@@ -12,6 +12,13 @@ spec:
   containers:
   - name: jnlp
     image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
+    resources:
+      requests:
+        cpu: "200m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json
