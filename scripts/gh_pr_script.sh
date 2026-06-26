@@ -84,7 +84,7 @@ function merge_pr_request {
  
 validateInput "$@"
  
-echo $GH_TOKEN
+# echo $GH_TOKEN
 get_ahead_by_stats
 search_pr_request
 create_pr

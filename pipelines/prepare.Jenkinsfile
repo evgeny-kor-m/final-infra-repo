@@ -41,21 +41,19 @@ spec:
     parameters {
                 string(name: 'DEPLOY_APP', defaultValue: '', description: 'Changed application name')
                 string(name: 'COMMIT_SHA', defaultValue: '', description: 'Commit id from CI')
-                string(name: 'REPO_URL', defaultValue: '', description: 'URL repository')
-                string(name: 'REPO_NAME', defaultValue: '', description: 'repository name')
     }
     stages {
         stage('# ---- print recieved variables from ci-pipeline ---- #') {
             steps {
                 script {
-                    def owner = params.REPO_URL.replaceAll('https://github.com/', '').split('/')[0]
-                    env.GIT_REPO = "${owner}/${params.REPO_NAME}"
+                    def currentUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
+                    def currentPath = infraUrl.replaceAll('https://github.com/', '').replaceAll('\\.git$', '')
+                    env.GIT_REPO = currentPath
                 }
                 sh """ set +x
                     echo "DEPLOY_APP: ${params.DEPLOY_APP}"
                     echo "COMMIT_SHA:  ${params.COMMIT_SHA}"
-                    echo "REPO_URL: ${params.REPO_URL}"
-                    echo "REPO_NAME:  ${params.REPO_NAME}"
+                    echo "GIT_REPO:  ${params.GIT_REPO}"
                 """
             }
         }
@@ -95,6 +93,7 @@ spec:
         }
         stage('# ---- run pr-script ---- #') {
             steps {
+                sleep 10
                 echo "running PR"
                 sh """
                     export GH_TOKEN=\$GITHUB_CRED_PSW
