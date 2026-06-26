@@ -253,8 +253,28 @@ Fill:
 - Branch → */main
 - Script Path → pipelines/prepare.Jenknisfile
 ```
-
-
-
+#### prepare.Jenkinsfile
+```
+CD Pipeline:
+  │
+  ▼
+1. git checkout cd/deployments
+    git pull origin main ← sync with latest changes
+  │
+  ▼
+2. sed → update image tag
+  │
+  ▼
+3. git push origin cd/deployments
+  │
+  ▼
+4. Open PR: cd/deployments → main
+  │
+  ▼
+5. Auto-merge PR
+  │
+  ▼
+main ← updated
+```
 
 
