@@ -13,6 +13,7 @@ https://devopscube.com/setup-jenkins-on-kubernetes-cluster/
 ```
   kubectl apply -f kubernetes/jenkins/jenkins-master -n jenkins-ns
   kubectl rollout restart statefulset/jenkins -n jenkins-ns
+  kubectl -n jenkins-ns get all,secrets,svc,configmap
 
   kubectl exec jenkins-0  -n jenkins-ns -- cat /var/jenkins_home/secrets/initialAdminPassword
   b92ec6fc4a204730b2d12a997cccd002
@@ -60,24 +61,6 @@ docker login 172.26.13.131:8083 -u admin -p nexusadmin
 docker tag jenkins-inbound-agent-image:latest  172.26.13.131:8083/jenkins-inbound-agent-image:latest 
 docker push 172.26.13.131:8083/jenkins-inbound-agent-image:latest
 ```
-#### Create & Configure new Inbound Agent 'Docker-Agent' in Jenkins
-Jenkins > Nodes > jenkins-frontend-inbound-agent > Create
-Fill:
-- Name: jenkins-frontend-inbound-agent  
-- Remote root directory: /home/jenkins  
-- Labels: jenkins-frontend-inbound-agent-label  
-- Launch method: Launch agent by connecting it to the controller  
-Take the secret: secret - (385166e968cf79801280b48b7352753180c8ccbab3f722e4f1ea65ee59d396cd) 
-
-#### Update | Create jenkins-frontend-secret
-
-kubectl apply -f kubernetes/secrets/jenkins-frontend-secret.yaml -n jenkins-ns
-
-kubectl apply -f kubernetes/jenkins/jenkins-slave -n jenkins-ns
-kubectl rollout restart deployment/jenkins-frontend-agent -n jenkins-ns
-
-kubectl -n jenkins-ns get all,secrets,svc,configmap
-
 #### Configure Ngrok  
 install ngrok in order to create static IP and proxy to your computer.  
 https://ngrok.com/download/windows?tab=download
@@ -93,6 +76,7 @@ ngrok http 30003
 RES: Forwarding    https://lightless-rocco-climacterically.ngrok-free.dev -> http://localhost:30003  
 ```
 #### Configure github webhook on Push event for frontend/backend repo
+Trigger: PUSH → DEV branch  
 github > (Reposirory) > settings > webhooks > Add webhook  
 ```
 Fill:  
@@ -105,11 +89,8 @@ Fill:
 #### Generic Webhook Trigger Plugin:
 Manage Jenkins → Plugins → Generic Webhook Trigger
 
-### CI Pipeline that builds and pushes a Docker image to Nexus
-Trigger: PUSH → DEV branch  
-
-<!-- #### Configure the Job in Jenkins
-build_and_push_pipeline to catch webhook only 
+#### CI Pipeline that builds and pushes a Docker image to Nexus
+Configure the Job in Jenkins to catch webhook only 
 ```
 Dashboard -> ci_pipeline -> Configure
 Triggers:
@@ -121,14 +102,15 @@ Fill:
 - Credentials -> select (github-infra-cred)    
 - Branch -> */main
 - Script Path -> pipelines/build.Jenkinsfile
-``` -->
-#### Kubernetes with Jenkins Dynamic Agents
+```
+### Kubernetes with Jenkins Dynamic Agents
 Dynamic Agents: Agents are Kubernetes pods that vanish after jobs finish. No more paying for idle VMs!
-Auto-Scaling: Need 10 agents at 2 PM and zero at 2 AM? Kubernetes handles it.
+Auto-Scaling: Need 10 agents at 2 PM and zero at 2 AM? Kubernetes handles it. (optional)
 Consistent Environments: Every job runs in a fresh, Dockerized workspace.   
 #### Connect Jenkins to Kubernetes
 Jenkins configurations:  
-Manage Jenkins → Nodes → Built-In Node → Configure
+```
+- Manage Jenkins → Nodes → Built-In Node → Configure
 → Number of executors: 0   
 → Save
 
@@ -136,42 +118,27 @@ Manage Jenkins → Nodes → Built-In Node → Configure
   → install 'Kubernetes' Plugin  
   → Restart Jenkins  
 
-Prerequisites & Cluster RBAC:  
-Jenkins needs explicit permissions to interact with your cluster's API to spin up and terminate agent pods.Create a service account, role, and role binding inside your dedicated Jenkins namespace
+- Prerequisites & Cluster RBAC:  Jenkins needs explicit permissions to interact with your cluster's API to spin up and terminate agent pods.  
+Create a service account, role, and role binding inside your dedicated Jenkins namespace.  
 
-Configure Jenkins Cloud Provider:  
-Jenkins → kube-kind (Cloud) → Kubernetes API
+# Configure Jenkins Cloud Provider - [Jenkins] → [kube-kind (Cloud)] → [Kubernetes API]:  
 - Manage Jenkins > Clouds > New Cloud.
-  → Type: Kubernetes
+  → Type: kube-kind
   → Kubernetes URL: https://kubernetes.default.svc
   → Kubernetes Namespace: jenkins-ns
   → Jenkins URL: http://jenkins-service.jenkins-ns.svc.cluster.local:8080
   → Jenkins tunnel: jenkins-service.jenkins-ns.svc.cluster.local:50000
   → Test Connection  -> Connected to Kubernetes v1.31.0
   → Restart Jenkins
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 #### Build.Jenkinsfile 
 ```
 # All changes in triggers {} need Run the Job manually once to re-read the Jenkinsfile
 pipeline {
-    agent { label 'jenkins-frontend-inbound-agent-label' }
+    agent { kubernetes {  yaml """ .....  """ }  }
     
     triggers {
-        GenericTrigger(
+        GenericTrigger(           # to catch webhook plybook
             genericVariables: [
                 [key: 'REPO_NAME', value: '$.repository.name'],
                 [key: 'REPO_URL',  value: '$.repository.clone_url'],
@@ -207,9 +174,8 @@ curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-web
 Run the Job via the Jenkins API:
 Jenkins UI → admin → Security → API Token → Add new Token
 → copy <api-token>
-curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733  <api-token>
+curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733
 ```
-
 ##### Using Kaniko instead Docker for build and pushing image
 Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access. It runs inside a container (for example, in a Kubernetes pod), making it ideal for secure CI/CD environments.   
 
@@ -274,6 +240,17 @@ stage('Build & Push') {
     }
 }
 ```
+#### CD Pipeline that change image Tag and pushe to GitHub
+
+
+
+
+
+
+
+
+
+
 
 
 
