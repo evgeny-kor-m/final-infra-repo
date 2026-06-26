@@ -67,13 +67,18 @@ spec:
         }
         stage('Git Commit & Push') {
             steps {
-                sh """
-                    git add ($pwd)/kubernetes/${params.DEPLOY_APP}/02-deployment.yaml
-                    git commit -m "CD: update ${params.DEPLOY_APP}-image to ${params.COMMIT_SHA}"
-                """
-
-                withCredentials([gitUsernamePassword(credentialsId: 'github-infra-cred', gitToolName: 'Default')]) {
-                    sh 'git push origin HEAD:main'
+                withCredentials([gitUsernamePassword(
+                    credentialsId: 'github-infra-cred',
+                    gitToolName: 'Default'
+                )]) {
+                    sh """
+                        git config user.email "jenkins@ci.com"
+                        git config user.name "Jenkins"
+                        
+                        git add kubernetes/${params.DEPLOY_APP}/02-deployment.yaml
+                        git commit -m "CD: update ${params.DEPLOY_APP}-image to ${params.COMMIT_SHA}"
+                        git push origin HEAD:main
+                    """
                 }
             }
         }
