@@ -73,9 +73,11 @@ spec:
                     if (env.REPO_NAME == 'final-frontend-repo') {
                         env.IMAGE_NAME = 'frontend-image'
                         env.GITHUB_CRED = 'github-frontend-cred'
+                        env.DEPLOY_APP = 'frontend'
                     } else if (env.REPO_NAME == 'final-backend-repo') {
                         env.IMAGE_NAME = 'backend-image'
                         env.GITHUB_CRED = 'github-backend-cred'
+                        env.DEPLOY_APP = 'backend'
                     }
                     echo "Building: ${env.IMAGE_NAME} from ${env.REPO_URL}"
                     echo "Using credentials: ${env.GITHUB_CRED}"
@@ -120,10 +122,14 @@ spec:
                     """
             }
         }
-        // stage('Cleanup') {
-        //     steps {
-        //         sh 'kill 1 || true'
-        //     }
-        // }
+        stage('# ---- Trigger cd-pipeline /Job Name/ ---- #') {
+            steps {
+                build job: 'cd-pipeline', wait: false, 
+                parameters: [
+                    string(name: 'DEPLOY_APP', value: "${env.DEPLOY_APP}"),
+                    string(name: 'COMMIT_SHA', value: "${env.COMMIT_SHA}")
+                ]
+            }
+        }
     }
 }

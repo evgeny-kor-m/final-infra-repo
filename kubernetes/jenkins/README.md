@@ -241,14 +241,20 @@ stage('Build & Push') {
 }
 ```
 #### CD Pipeline that change image Tag and pushe to GitHub
-
-
-
-
-
-
-
-
+```
+Dashboard → cd-pipeline → Configure
+Triggers:
+[v] Build after other projects are built  
+- Projects to watch: ci-pipeline
+- [v] Trigger only if build is stable
+Pipeline → Definition → Pipeline script from SCM
+Fill:
+- SCM → Git
+- Repository URL → https://github.com/evgeny-kor-m/final-infra-repo.git  
+- Credentials → select (github-infra-cred)
+- Branch → */main
+- Script Path → pipelines/prepare.Jenknisfile
+```
 
 
 
