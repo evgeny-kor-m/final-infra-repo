@@ -127,9 +127,7 @@ spec:
                 build job: 'cd-pipeline', wait: false, 
                 parameters: [
                     string(name: 'DEPLOY_APP', value: "${env.DEPLOY_APP}"),
-                    string(name: 'COMMIT_SHA', value: "${env.COMMIT_SHA}"),
-                    string(name: 'REPO_URL', value: "${env.REPO_URL}"),
-                    string(name: 'REPO_NAME', value: "${env.REPO_NAME}")
+                    string(name: 'COMMIT_SHA', value: "${env.COMMIT_SHA}")
                 ]
             }
         }
