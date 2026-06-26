@@ -41,8 +41,8 @@ spec:
         stage('# ---- print recieved variables from ci-pipeline ---- #') {
             steps {
                 sh """ set +x
-                    echo "DEPLOY_APP: ${env.DEPLOY_APP}"
-                    echo "COMMIT_SHA:  ${env.COMMIT_SHA}"
+                    echo "DEPLOY_APP: ${params.DEPLOY_APP}"
+                    echo "COMMIT_SHA:  ${params.COMMIT_SHA}"
                 """
             }
         }
