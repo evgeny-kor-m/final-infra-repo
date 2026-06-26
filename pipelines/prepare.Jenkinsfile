@@ -46,5 +46,16 @@ spec:
                 """
             }
         }
-    } 
+        stage('Action') {
+            steps {
+                sh """
+                        echo "=== workspace content ==="
+                        ls -la
+                        
+                        echo "=== pwd ==="
+                        pwd
+                    """
+            }
+        }
+    }
 }
