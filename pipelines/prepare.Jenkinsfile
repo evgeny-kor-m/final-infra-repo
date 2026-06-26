@@ -34,7 +34,7 @@ spec:
                 }
      }
     parameters {
-                string(name: 'DEPLOY_APP', defaultValue: '', description: 'Changed application name'),
+                string(name: 'DEPLOY_APP', defaultValue: '', description: 'Changed application name')
                 string(name: 'COMMIT_SHA', defaultValue: '', description: 'Commit id from CI')
     }
     stages {
