@@ -47,13 +47,13 @@ spec:
             steps {
                 script {
                     def currentUrl = sh(script: "git remote get-url origin", returnStdout: true).trim()
-                    def currentPath = infraUrl.replaceAll('https://github.com/', '').replaceAll('\\.git$', '')
+                    def currentPath = currentUrl.replaceAll('https://github.com/', '').replaceAll('\\.git$', '')
                     env.GIT_REPO = currentPath
                 }
                 sh """ set +x
                     echo "DEPLOY_APP: ${params.DEPLOY_APP}"
                     echo "COMMIT_SHA:  ${params.COMMIT_SHA}"
-                    echo "GIT_REPO:  ${params.GIT_REPO}"
+                    echo "GIT_REPO:  ${env.GIT_REPO}"
                 """
             }
         }
