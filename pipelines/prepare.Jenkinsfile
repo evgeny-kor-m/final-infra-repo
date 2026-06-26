@@ -46,15 +46,36 @@ spec:
                 """
             }
         }
-        stage('Action') {
+        stage('Check pwd and ls -la') {
             steps {
                 sh """
-                        echo "=== workspace content ==="
                         ls -la
-                        
-                        echo "=== pwd ==="
                         pwd
                     """
+            }
+        }
+        stage('Update Image Tag') {
+            steps {
+                sh """
+                    sed -i 's|${params.DEPLOY_APP}"-image":.*|${params.DEPLOY_APP}"-image":${params.COMMIT_SHA}|g' \
+                        ($pwd)/kubernetes/${params.DEPLOY_APP}/02-deployment.yaml
+
+                    echo " ---- Updated file ---- "
+                    cat ($pwd)/kubernetes/${params.DEPLOY_APP}/02-deployment.yaml
+                """
+            }
+        }
+        stage('Git Push') {
+            steps {
+                sh '''
+                    git add build.log
+                    git add ($pwd)/kubernetes/${params.DEPLOY_APP}/02-deployment.yaml
+                    git commit -m "CD: update ${params.DEPLOY_APP}-image to ${params.COMMIT_SHA}"
+                '''
+
+                withCredentials([gitUsernamePassword(credentialsId: 'github-infra-cred', gitToolName: 'Default')]) {
+                    sh 'git push origin HEAD:DEV'
+                }
             }
         }
     }
