@@ -16,10 +16,13 @@ kubectl apply -n argocd -f ./argocd/install.yaml
 kubectl -n argocd get all,secrets,svc,configmap,crd
 
 # Run the NodePort locally
-kubectl patch svc argocd-server -n argocd   -p '{"spec": {"type": "NodePort"}}'
+# kubectl patch svc argocd-server -n argocd   -p '{"spec": {"type": "NodePort"}}'
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 80, "targetPort": 8080, "nodePort": 30004, "protocol": "TCP", "name": "http"}]}}'
+https://localhost:30004/
+
 kubectl get svc -n argocd
 kubectl get svc -n argocd -o wide --watch
-kubectl port-forward svc/argocd-server -n argocd 8085:443
+# kubectl port-forward svc/argocd-server -n argocd 8085:443
 
 # Go to the Browser and login to the ArgoCD
  http://localhost:8085
