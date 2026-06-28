@@ -11,7 +11,7 @@ https://devopscube.com/setup-jenkins-on-kubernetes-cluster/
 
 # Run
 ```
-  kubectl apply -f kubernetes/jenkins/jenkins-master -n jenkins-ns
+  kubectl apply -f kubernetes/jenkins -n jenkins-ns
   kubectl rollout restart statefulset/jenkins -n jenkins-ns
   kubectl -n jenkins-ns get all,secrets,svc,configmap
 

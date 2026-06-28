@@ -100,3 +100,10 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 # # pkill -f "port-forward svc/nexus-service"
 # # 6. frontend
 # # kubectl apply -f kubernetes/frontend/ -n frontend
+
+
+# kubectl apply -f kubernetes/jenkins -n jenkins-ns
+
+
+
+

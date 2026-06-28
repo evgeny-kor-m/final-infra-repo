@@ -1,0 +1,37 @@
+# application.yaml
+# Basic ArgoCD Application definition
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  # Application name - must be unique within the ArgoCD namespace
+  name: frontend-app
+  # ArgoCD Applications typically live in the argocd namespace
+  namespace: argocd
+  # Finalizers prevent accidental deletion of cluster resources (Deployment, Service, ConfigMap) from kubernetes/frontend
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # Project groups Applications and defines access controls
+  project: default
+
+  # Source defines where to fetch the manifests
+  source:
+    repoURL: https://github.com/evgeny-kor-m/final-infra-repo.git
+    targetRevision: HEAD
+    path: kubernetes/frontend
+
+  # Destination defines where to deploy
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: frontend
+
+  # Sync policy controls automatic synchronization
+  syncPolicy:
+    automated:
+      # Prune removes resources not defined in Git
+      prune: true
+      # SelfHeal reverts manual changes made to cluster resources as defined in Git
+      selfHeal: true
+    syncOptions:
+      # Create namespace if it does not exist
+      - CreateNamespace=true
