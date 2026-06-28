@@ -1,4 +1,4 @@
-# application.yaml
+# application1.yaml
 # Basic ArgoCD Application definition
 apiVersion: argoproj.io/v1alpha1
 kind: Application
