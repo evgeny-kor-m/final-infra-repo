@@ -152,7 +152,7 @@ Metrics:
 Observability → Infrastructure → Metrics Explorer # Metrics NODES and Posd from Metricbeat
 
 Трейсы:
-Observability → APM → пока пусто, нужен APM Agent в коде приложения
+Observability → APM → still empty, need add APM Agent in application code:
 In frontend :
 // in begining of (index.js/server.js)
 const apm = require('elastic-apm-node').start({
@@ -172,6 +172,6 @@ client = Client({
 })
 
 All ELK Stack:
-Management → Stack Monitoring → состояние Elasticsearch, Logstash, Kibana, Beats
+Management → Stack Monitoring → state of Elasticsearch, Logstash, Kibana, Beats
 Note: There is no data because `xpack.monitoring.enabled: false` in Logstash and Metricbeat does not send metrics about ELK itself.
 ```
