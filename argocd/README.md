@@ -1,6 +1,10 @@
 ## ArgoCD
 ###
 ```
+https://medium.com/@kittipat_1413/advanced-deployment-strategies-using-applicationsets-and-application-of-applications-in-argocd-e01774e10561
+https://oneuptime.com/blog/post/2026-02-26-argocd-application-declarative-yaml/view
+https://oneuptime.com/blog/post/2026-02-02-argocd-applications/view
+
 kubectl create namespace argocd
 
 # Install crd
@@ -25,7 +29,7 @@ kubectl get svc -n argocd -o wide --watch
 # kubectl port-forward svc/argocd-server -n argocd 8085:443
 
 # Go to the Browser and login to the ArgoCD
- http://localhost:8085
+# http://localhost:8085
 
 User: admin
 Password: from command (DylNriEKQEa8k-nm)
