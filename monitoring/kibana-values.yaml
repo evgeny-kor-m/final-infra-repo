@@ -1,0 +1,23 @@
+namespaceOverride: "monitoring"
+
+elasticsearchHosts: "https://elasticsearch-master:9200"   # ES endpoint with TLS
+
+# Mount ES certificate for HTTPS
+elasticsearchCertificateAuthoritiesFile: ca.crt
+# Secret created by ES helm chart
+elasticsearchCertificateSecret: elasticsearch-master-certs
+
+# Credentials secret created by ES helm chart
+elasticsearchCredentialSecret: elasticsearch-master-credentials
+
+service:
+  type: NodePort
+  port: 5601
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"

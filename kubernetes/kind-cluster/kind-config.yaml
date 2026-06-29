@@ -22,12 +22,16 @@ nodes:
 - role: worker
   image: kindest/node:v1.31.0
   extraPortMappings:
-  - containerPort: 30003      # (Jenkins) NodePort of the Service inside the cluster
+  - containerPort: 30003      # (Jenkins) NodePort
     hostPort: 30003           # access from browser: http://localhost:30003
     listenAddress: "0.0.0.0"
-  - containerPort: 30004      # (ArgoCD) NodePort of the second Service inside the cluster
+  - containerPort: 30004      # (ArgoCD) NodePort
     hostPort: 30004           # access from browser: http://localhost:30004
     listenAddress: "0.0.0.0"
+  - containerPort: 30006      # (Kibana) NodePort
+    hostPort: 30006
+    listenAddress: "0.0.0.0"
+
 # Allow pulling images from insecure Nexus registry inside the cluster
 containerdConfigPatches:
 - |-

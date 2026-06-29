@@ -1,0 +1,59 @@
+namespaceOverride: "monitoring"
+
+extraEnvs:
+  - name: "ELASTICSEARCH_USERNAME"
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-master-credentials
+        key: username
+  - name: "ELASTICSEARCH_PASSWORD"
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-master-credentials
+        key: password
+
+logstashConfig:
+  logstash.yml: |
+    http.host: 0.0.0.0               # Bind API to all interfaces (required for readiness probe)
+    xpack.monitoring.enabled: false  # Disable X-Pack monitoring to save resources
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044    # Receive logs from Filebeat (beats)
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["https://elasticsearch-master:9200"]  # ES endpoint with TLS
+        cacert => "/usr/share/logstash/config/elasticsearch-master-certs/ca.crt"  # TLS certificate
+        user => '${ELASTICSEARCH_USERNAME}'     # Injected from extraEnvs
+        password => '${ELASTICSEARCH_PASSWORD}' # Injected from extraEnvs
+        index => "filebeat-%{+YYYY.MM.dd}"      # Daily index pattern for log rotation
+      }
+    }
+# Mount ES TLS certificate
+secretMounts:
+  - name: "elasticsearch-master-certs"
+    secretName: "elasticsearch-master-certs"
+    path: "/usr/share/logstash/config/elasticsearch-master-certs"
+
+service:
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044    # Filebeat → Logstash input port
+      protocol: TCP
+      targetPort: 5044
+
+# Limit JVM heap to fit within container memory limits
+logstashJavaOpts: "-Xmx512m -Xms512m"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"

@@ -1,0 +1,19 @@
+replicas: 1
+minimumMasterNodes: 1              # Minimum master nodes required for cluster health
+namespaceOverride: "monitoring"
+
+esJavaOpts: "-Xmx512m -Xms512m"    # JVM heap size - keep equal to avoid resizing overhead
+antiAffinity: "soft"               # Prefer spreading pods across nodes but allow same-node scheduling
+
+volumeClaimTemplate:
+  resources:
+    requests:
+      storage: 3Gi
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"                 # Must be greater than esJavaOpts Xmx + JVM overhead

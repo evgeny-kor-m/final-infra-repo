@@ -1,0 +1,26 @@
+namespaceOverride: "monitoring"
+
+filebeatConfig:
+  filebeat.yml: |
+    filebeat.inputs:
+    - type: container                    # Collect logs from container runtime
+      paths:
+        - /var/log/containers/*.log      # Path to all container logs on the node
+      processors:
+      - add_kubernetes_metadata:         # Enrich logs with pod/namespace/label metadata
+          host: ${NODE_NAME}             # Current node name injected by Kubernetes
+          matchers:
+          - logs_path:
+              logs_path: "/var/log/containers/"  # Match logs by file path to identify pod
+
+    output.logstash:
+      hosts: ["logstash-logstash:5044"] # Send logs to Logstash service inside the cluster
+
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "200m"
+    memory: "200Mi"
