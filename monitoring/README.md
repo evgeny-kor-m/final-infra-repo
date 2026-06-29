@@ -3,6 +3,7 @@ https://medium.com/@kayvan.sol2/deploy-elasticsearch-kibana-logstash-with-docker
 
 <p align="left">
   <img src="pic/ELK.jpg" width="500" alt="view"/>
+  <img src="pic/EFLK.jpg" width="500" alt="view"/>
 </p>
 
 ### Objective:
