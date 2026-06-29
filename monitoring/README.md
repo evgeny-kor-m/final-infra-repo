@@ -66,7 +66,7 @@ kubectl -n monitoring get all,secrets,svc,configmap,crd,job
 # 1. Add the Elastic Helm repository
   helm repo add elastic https://helm.elastic.co
   helm repo update
-  # View availible versions
+  # View availible elasticsearch versions
   helm search repo elastic/elasticsearch --versions | head -20
 
 # 2. Create a elasticsearch-values.yaml
@@ -99,8 +99,21 @@ kubectl -n monitoring get all,secrets,svc,configmap,crd,job
   helm uninstall kibana -n monitoring
   kubectl delete jobs -n monitoring -l app=kibana
 ```
-
-### Step 5: Access Kibana and View Logs
+### Step 5: Configure and Install metricbeat
+```
+# Check availible versions
+helm search repo elastic/metricbeat --versions | head -5
+helm install metricbeat elastic/metricbeat --version 8.5.1 \
+  -n monitoring -f monitoring/metricbeat-values.yaml
+```
+### Step 6: Configure and Install apm-server for Traces
+```
+# Check availible versions
+helm search repo elastic/apm-server --versions | head -5
+helm install apm-server elastic/apm-server --version 8.5.1 \
+  -n monitoring -f monitoring/apm-server-values.yaml
+```
+### Step 7: Access Kibana and View Logs
 ```
 # 1. Find the NodePort assigned to Kibana:
   kubectl get svc kibana-kibana -n monitoring -o jsonpath="{.spec.ports[0].nodePort}"
@@ -114,53 +127,51 @@ kubectl -n monitoring get all,secrets,svc,configmap,crd,job
   # password
   kubectl get secret -n monitoring elasticsearch-master-credentials -o jsonpath="{.data.password}" | base64 --decode
 ```
-### Step 6: Check Elasticsearch Cluster Health
+### Step 8: Check Elasticsearch Cluster Health
 ```
 # 1. Check Cluster Health from elasticsearch-pod-name or any-other-pod:
 kubectl exec -it logstash-logstash-0 -n monitoring  -- curl -XGET -u elastic -vk 'https://elasticsearch-master:9200/_cluster/health?pretty'
 ```
-### Check all logs 
+### 9. Create Data View 
 ```
+http://localhost:5601
 Check in Kibana:
-
-Open http://localhost:5601
 Go to Management → Stack Management → Index Management - the filebeat-* index should appear
 Create an index pattern: Management → Kibana → Data Views → Create data view
 Name:          filebeat-*
 Index pattern: filebeat-*
 Timestamp:     @timestamp
-Go to Discover - you'll see logs from all pods
+Go to Discover - see logs from all pods
 ```
-### Step 3: Configure and Install metricbeat
+### 10. View
 ```
-# Check availible versions
-helm search repo elastic/metricbeat --versions | head -5
-helm install metricbeat elastic/metricbeat --version 8.5.1 \
-  -n monitoring -f monitoring/metricbeat-values.yaml
-```
-### Step 3: Configure and Install apm-server for Traces
-```
-# Check availible versions
-helm search repo elastic/apm-server --versions | head -5
-helm install apm-server elastic/apm-server --version 8.5.1 \
-  -n monitoring -f monitoring/apm-server-values.yaml
-```
+Logs:
+Observability → Logs → Stream # Show live logs from all pods
 
-Перейди по каждому разделу:
-Логи:
-
-Observability → Logs → увидишь live логи со всех подов
-
-Метрики:
-
-Observability → Infrastructure → метрики нод и подов от Metricbeat
+Metrics:
+Observability → Infrastructure → Metrics Explorer # Metrics NODES and Posd from Metricbeat
 
 Трейсы:
-
 Observability → APM → пока пусто, нужен APM Agent в коде приложения
+In frontend :
+// in begining of (index.js/server.js)
+const apm = require('elastic-apm-node').start({
+  serviceName: 'frontend',
+  serverUrl: 'http://apm-server-apm-server.monitoring.svc.cluster.local:8200',
+})
+// install
+npm install elastic-apm-node
+In backend 
+# Python
+import elasticapm
+elasticapm.instrument()
+from elasticapm import Client
+client = Client({
+  'SERVICE_NAME': 'backend',
+  'SERVER_URL': 'http://apm-server-apm-server.monitoring.svc.cluster.local:8200'
+})
 
-Весь стек ELK:
-
+All ELK Stack:
 Management → Stack Monitoring → состояние Elasticsearch, Logstash, Kibana, Beats
-
-Начни с Logs и Infrastructure — там данные уже должны быть.
+Note: There is no data because `xpack.monitoring.enabled: false` in Logstash and Metricbeat does not send metrics about ELK itself.
+```
