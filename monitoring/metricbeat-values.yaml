@@ -1,0 +1,112 @@
+namespaceOverride: "monitoring"
+
+daemonset:
+  metricbeatConfig:
+    metricbeat.yml: |
+      metricbeat.modules:
+      # Collect metrics from Kubernetes nodes
+      - module: kubernetes
+        metricsets:
+          - node
+          - system
+          - pod
+          - container
+          - volume
+        period: 10s
+        host: ${NODE_NAME}
+        hosts: ["https://${NODE_NAME}:10250"]
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        ssl.verification_mode: "none"
+        processors:
+        - add_kubernetes_metadata: ~
+
+      output.elasticsearch:
+        hosts: ["https://elasticsearch-master:9200"]
+        username: '${ELASTICSEARCH_USERNAME}'
+        password: '${ELASTICSEARCH_PASSWORD}'
+        ssl.certificate_authorities:
+          - /usr/share/metricbeat/config/elasticsearch-master-certs/ca.crt
+
+  extraEnvs:
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: ELASTICSEARCH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-master-credentials
+          key: username
+    - name: ELASTICSEARCH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-master-credentials
+          key: password
+
+  secretMounts:
+    - name: elasticsearch-master-certs
+      secretName: elasticsearch-master-certs
+      path: /usr/share/metricbeat/config/elasticsearch-master-certs
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "200m"
+      memory: "200Mi"
+
+deployment:
+  metricbeatConfig:
+    metricbeat.yml: |
+      metricbeat.modules:
+      # Collect metrics from Kubernetes API server
+      - module: kubernetes
+        metricsets:
+          - state_node
+          - state_deployment
+          - state_replicaset
+          - state_pod
+          - state_container
+          - event
+        period: 10s
+        host: ${NODE_NAME}
+        hosts: ["kube-state-metrics.kube-system.svc.cluster.local:8080"]
+        processors:
+        - add_kubernetes_metadata: ~
+
+      output.elasticsearch:
+        hosts: ["https://elasticsearch-master:9200"]
+        username: '${ELASTICSEARCH_USERNAME}'
+        password: '${ELASTICSEARCH_PASSWORD}'
+        ssl.certificate_authorities:
+          - /usr/share/metricbeat/config/elasticsearch-master-certs/ca.crt
+
+  extraEnvs:
+    - name: NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    - name: ELASTICSEARCH_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-master-credentials
+          key: username
+    - name: ELASTICSEARCH_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: elasticsearch-master-credentials
+          key: password
+
+  secretMounts:
+    - name: elasticsearch-master-certs
+      secretName: elasticsearch-master-certs
+      path: /usr/share/metricbeat/config/elasticsearch-master-certs
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "100Mi"
+    limits:
+      cpu: "200m"
+      memory: "200Mi"

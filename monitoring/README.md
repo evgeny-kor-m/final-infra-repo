@@ -119,4 +119,48 @@ kubectl -n monitoring get all,secrets,svc,configmap,crd,job
 # 1. Check Cluster Health from elasticsearch-pod-name or any-other-pod:
 kubectl exec -it logstash-logstash-0 -n monitoring  -- curl -XGET -u elastic -vk 'https://elasticsearch-master:9200/_cluster/health?pretty'
 ```
+### Check all logs 
+```
+Check in Kibana:
 
+Open http://localhost:5601
+Go to Management → Stack Management → Index Management - the filebeat-* index should appear
+Create an index pattern: Management → Kibana → Data Views → Create data view
+Name:          filebeat-*
+Index pattern: filebeat-*
+Timestamp:     @timestamp
+Go to Discover - you'll see logs from all pods
+```
+### Step 3: Configure and Install metricbeat
+```
+# Check availible versions
+helm search repo elastic/metricbeat --versions | head -5
+helm install metricbeat elastic/metricbeat --version 8.5.1 \
+  -n monitoring -f monitoring/metricbeat-values.yaml
+```
+### Step 3: Configure and Install apm-server for Traces
+```
+# Check availible versions
+helm search repo elastic/apm-server --versions | head -5
+helm install apm-server elastic/apm-server --version 8.5.1 \
+  -n monitoring -f monitoring/apm-server-values.yaml
+```
+
+Перейди по каждому разделу:
+Логи:
+
+Observability → Logs → увидишь live логи со всех подов
+
+Метрики:
+
+Observability → Infrastructure → метрики нод и подов от Metricbeat
+
+Трейсы:
+
+Observability → APM → пока пусто, нужен APM Agent в коде приложения
+
+Весь стек ELK:
+
+Management → Stack Monitoring → состояние Elasticsearch, Logstash, Kibana, Beats
+
+Начни с Logs и Infrastructure — там данные уже должны быть.

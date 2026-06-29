@@ -14,4 +14,10 @@ helm install kibana elastic/kibana --version 8.5.1 -n monitoring -f ./monitoring
 
 helm install filebeat elastic/filebeat --version 8.5.1 -n monitoring -f ./monitoring/filebeat-values.yaml
 
+helm install metricbeat elastic/metricbeat --version 8.5.1 \
+  -n monitoring -f monitoring/metricbeat-values.yaml
+
+helm install apm-server elastic/apm-server --version 8.5.1 \
+  -n monitoring -f monitoring/apm-server-values.yaml
+
 kubectl -n monitoring get all,secrets,svc,configmap,crd,job,serviceaccount
