@@ -6,11 +6,12 @@ metadata:
   name: nexus-service
   namespace: nexus-ns
 spec:
-  type: ClusterIP
+  type: NodePort 
   ports:
   - name: ui
     port: 8081
     targetPort: 8081
+    nodePort: 30005
   - name: docker
     port: 8083
     targetPort: 8083

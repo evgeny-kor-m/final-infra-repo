@@ -1,0 +1,28 @@
+# Resource budget for database namespace
+# Contains: MongoDB StatefulSet (3 replicas, replica set + auth) + mongo-express UI
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: database-quota
+  namespace: database
+spec:
+  hard:
+    requests.cpu: "800m"
+    requests.memory: "1.6Gi"
+    limits.cpu: "1.5"
+    limits.memory: "2.8Gi"   # 3x mongodb (700Mi each = 2.1Gi) + mongo-express (~300Mi) + headroom
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: database-limits
+  namespace: database
+spec:
+  limits:
+  - default:
+      cpu: "300m"
+      memory: "700Mi"
+    defaultRequest:
+      cpu: "100m"
+      memory: "350Mi"
+    type: Container

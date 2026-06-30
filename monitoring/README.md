@@ -4,6 +4,7 @@ https://medium.com/@muppedaanvesh/a-hands-on-guide-to-kubernetes-logging-using-e
 <p align="left">
   <img src="pic/ELK.jpg" width="500" alt="view"/>
   <img src="pic/EFLK.jpg" width="500" alt="view"/>
+  <img src="pic/ELKF-Stack.jpg" width="500" alt="view"/>
 </p>
 
 ### Objective:
@@ -134,7 +135,9 @@ kubectl exec -it logstash-logstash-0 -n monitoring  -- curl -XGET -u elastic -vk
 ```
 ### 9. Create Data View 
 ```
+kubectl port-forward svc/kibana-kibana -n monitoring 5601:5601
 http://localhost:5601
+
 Check in Kibana:
 Go to Management → Stack Management → Index Management - the filebeat-* index should appear
 Create an index pattern: Management → Kibana → Data Views → Create data view

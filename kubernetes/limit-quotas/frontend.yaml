@@ -1,0 +1,28 @@
+# Resource budget for frontend namespace (5 replicas required by assignment)
+# No real traffic expected - minimal footprint per pod
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: frontend-quota
+  namespace: frontend
+spec:
+  hard:
+    requests.cpu: "250m"     # 5 x 50m
+    requests.memory: "400Mi" # 5 x 80Mi
+    limits.cpu: "500m"       # 5 x 100m
+    limits.memory: "500Mi"   # 5 x 100Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: frontend-limits
+  namespace: frontend
+spec:
+  limits:
+  - default:
+      cpu: "100m"
+      memory: "100Mi"
+    defaultRequest:
+      cpu: "50m"
+      memory: "80Mi"
+    type: Container

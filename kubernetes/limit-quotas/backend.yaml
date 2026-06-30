@@ -1,0 +1,28 @@
+# Resource budget for backend namespace (5 replicas required by assignment)
+# No real traffic expected - minimal footprint per pod
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: backend-quota
+  namespace: backend
+spec:
+  hard:
+    requests.cpu: "350m"     # 5 x 70m
+    requests.memory: "600Mi" # 5 x 120Mi
+    limits.cpu: "750m"       # 5 x 150m
+    limits.memory: "750Mi"   # 5 x 150Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: backend-limits
+  namespace: backend
+spec:
+  limits:
+  - default:
+      cpu: "150m"
+      memory: "150Mi"
+    defaultRequest:
+      cpu: "70m"
+      memory: "120Mi"
+    type: Container

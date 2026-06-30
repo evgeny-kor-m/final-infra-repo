@@ -1,12 +1,12 @@
-kind delete cluster --name kind-01                                                              : delete cluster
-kind create cluster --name kind-01 --config ./kubernetes/kind-cluster/kind-config.yaml          : create cluster
-kind get clusters
+kind delete cluster --name kind-01                                                              : delete cluster  
+kind create cluster --name kind-01 --config ./kubernetes/kind-cluster/kind-config.yaml          : create cluster  
+kind get clusters  
 
 
 # Check that it loaded
-docker exec -it kind-01-worker crictl images | grep backend
-docker exec -it kind-01-worker2 crictl images | grep backend
-docker exec -it kind-01-control-plane crictl images | grep backend
+docker exec -it kind-01-worker crictl images | grep backend  
+docker exec -it kind-01-worker2 crictl images | grep backend  
+docker exec -it kind-01-control-plane crictl images | grep backend  
 
 
 #### Problem: containerd Cannot Resolve Kubernetes Internal DNS

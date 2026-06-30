@@ -1,0 +1,27 @@
+# Resource budget for Jenkins namespace (Jenkins controller + CI build agents)
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: jenkins-ns-quota
+  namespace: jenkins-ns
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: "850Mi"
+    limits.cpu: "800m"
+    limits.memory: "1.1Gi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: jenkins-ns-limits
+  namespace: jenkins-ns
+spec:
+  limits:
+  - default:
+      cpu: "200m"
+      memory: "350Mi"
+    defaultRequest:
+      cpu: "50m"
+      memory: "220Mi"
+    type: Container

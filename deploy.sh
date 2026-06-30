@@ -4,6 +4,8 @@ source alias.txt
 
 # 1. namespaces first
 kubectl apply -f kubernetes/namespaces/
+# LimitRange & ResourceQuota
+kubectl apply -f kubernetes/limit-quotas/
 
 # 2. secrets
 kubectl apply -k kubernetes/secrets/
@@ -89,6 +91,8 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 # docker login 172.26.13.131:8083 -u admin -p nexusadmin
 # docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
 # docker push 172.26.13.131:8083/backend-image:latest
+# docker tag frontend-image:latest 172.26.13.131:8083/frontend-image:latest
+# docker push 172.26.13.131:8083/frontend-image:latest
 
 # # 5. backend
 # kubectl apply -k kubernetes/backend/ -n backend

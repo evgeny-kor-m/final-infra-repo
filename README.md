@@ -1,5 +1,14 @@
 # final-infra-repo
 
+### Sync .wslconfig with Docker Desktop to limit resources
+[wsl2]
+kernelCommandLine = systemd.unified_cgroup_hierarchy=1
+memory=8GB
+processors=8
+swap=2GB
+
+Namespacerequests.memrequests.cpulimits.memlimits.cpujenkins-ns1Gi1.01.3Gi1.5argocd700Mi0.51Gi1.0nexus-ns600Mi0.4900Mi0.8monitoring2Gi1.02.8Gi2.0frontend200Mi0.2350Mi0.4backend200Mi0.2350Mi0.4database300Mi0.2500Mi0.4Сумма requests~5Gi~3.5 coresСумма limits~7.2Gi~6.5 cores
+
 ## Database MongoDB
 
 For production, MongoDB Operator or Bitnami Helm would be used.  
@@ -41,7 +50,7 @@ kubectl apply -k kubernetes/mongodb/
 kubectl get pods -n database -w
 k get pvc
 d get sts mongodb
-kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw  --eval "db.version()"
+kubectl exec -it mongodb-0 -n database -- mongosh -u admin -p passw --authenticationDatabase admin --eval "db.version()"
 ```
 #### Encoding values in secrets
 ```
@@ -78,17 +87,21 @@ spec:
         - "--auth"                   # enable authentication
 ------------
 # Wait for all pods to be running
+kubectl  get all,secrets,svc,pvc,rs,configmap -n database
+
+kubectl get secret mongodb-secret -n database -o jsonpath='{.data.username}' | base64 -d
+kubectl get secret mongodb-secret -n database -o jsonpath='{.data.password}' | base64 -d
 
 # Connect to primary and initialize replica set
-kubectl exec -it mongodb-0 -n mongodb -- mongosh
+kubectl exec -it mongodb-0 -n database -- mongosh
 
 # In mongosh shell:
 rs.initiate({
   _id: "rs0",
   members: [
-    { _id: 0, host: "mongodb-0.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 2 },
-    { _id: 1, host: "mongodb-1.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 1 },
-    { _id: 2, host: "mongodb-2.mongodb-headless.mongodb.svc.cluster.local:27017", priority: 1 }
+    { _id: 0, host: "mongodb-0.mongodb-headless.database.svc.cluster.local:27017", priority: 2 },
+    { _id: 1, host: "mongodb-1.mongodb-headless.database.svc.cluster.local:27017", priority: 1 },
+    { _id: 2, host: "mongodb-2.mongodb-headless.database.svc.cluster.local:27017", priority: 1 }
   ]
 })
 
@@ -100,6 +113,7 @@ Example :  https://oneuptime.com/blog/post/2026-01-25-mongodb-replica-sets-kuber
 #### Craete Mongo Express viewer
 ```
 kubectl apply -f kubernetes/mongo-express -n database
+kubectl rollout restart deployment/mongo-express -n database
 kubectl -n database port-forward svc/mongo-express-service 8081:8081
 ```
 #### (Optionaly) Manually add row into table
@@ -197,12 +211,6 @@ docker login 172.26.13.131:8083 -u admin -p nexusadmin
 }
 Save & Apply
 
-kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
-
-docker login 172.26.13.131:8083 -u admin -p nexusadmin
-docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
-docker push 172.26.13.131:8083/backend-image:latest
-
 ```
 
 ```
@@ -232,13 +240,12 @@ Settings -> Security -> Realms
 Docker Bearer Token Realm -> move to -> Active
 Save
 
-kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns  --address=0.0.0.0 &
+kubectl port-forward svc/nexus-service 8083:8083 -n nexus-ns --address=0.0.0.0
 
+docker login 172.26.13.131:8083 -u admin -p nexusadmin
+docker tag backend-image:latest 172.26.13.131:8083/backend-image:latest
+docker push 172.26.13.131:8083/backend-image:latest
 
-http://127.0.0.1:8082/repository/backend-image/
-docker login localhost:8082
-docker tag backend-image:latest localhost:8082/repository/backend-image:latest 
-docker push localhost:8082/repository/backend-image:latest
 
 ```
 ## Frontend 

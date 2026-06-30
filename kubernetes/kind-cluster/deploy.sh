@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Step 1 - Create cluster
-kind create cluster --name kind-01 --config kind-config.yaml
+kind create cluster --name kind-01 --config kubernetes/kind-cluster/kind-config.yaml
 
 # Step 2 - Wait for CoreDNS
 echo "Waiting for CoreDNS..."

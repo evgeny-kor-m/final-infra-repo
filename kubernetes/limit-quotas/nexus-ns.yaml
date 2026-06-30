@@ -1,0 +1,28 @@
+# Resource budget for Nexus namespace (Docker registry / artifact storage + Trivy scanner for bonus task)
+# Nexus is JVM-based and needs proper heap allocation to start without OOMKilled
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: nexus-ns-quota
+  namespace: nexus-ns
+spec:
+  hard:
+    requests.cpu: "400m"     # Nexus 300m + Trivy 100m
+    requests.memory: "1.2Gi" # Nexus 1Gi + Trivy 150Mi
+    limits.cpu: "1"          # Nexus 700m + Trivy 300m
+    limits.memory: "1.8Gi"   # Nexus 1.5Gi + Trivy 300Mi
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: nexus-ns-limits
+  namespace: nexus-ns
+spec:
+  limits:
+  - default:
+      cpu: "300m"
+      memory: "1.5Gi"   # Nexus default - JVM needs proper headroom to start
+    defaultRequest:
+      cpu: "200m"
+      memory: "1Gi"
+    type: Container

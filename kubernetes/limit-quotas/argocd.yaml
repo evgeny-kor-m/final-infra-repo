@@ -1,0 +1,27 @@
+# Resource budget for ArgoCD namespace (server, repo-server, app controller, dex, redis, etc.)
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: argocd-quota
+  namespace: argocd
+spec:
+  hard:
+    requests.cpu: "250m"
+    requests.memory: "600Mi"
+    limits.cpu: "500m"
+    limits.memory: "850Mi"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: argocd-limits
+  namespace: argocd
+spec:
+  limits:
+  - default:
+      cpu: "100m"
+      memory: "180Mi"
+    defaultRequest:
+      cpu: "40m"
+      memory: "90Mi"
+    type: Container
