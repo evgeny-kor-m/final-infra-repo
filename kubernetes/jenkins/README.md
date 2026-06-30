@@ -87,7 +87,7 @@ Fill:
 
 ```
 #### Generic Webhook Trigger Plugin:
-Manage Jenkins → Plugins → Generic Webhook Trigger
+// Automated: Manage Jenkins → Plugins → Generic Webhook Trigger
 
 #### CI Pipeline that builds and pushes a Docker image to Nexus
 Configure the Job in Jenkins to catch webhook only 
@@ -114,6 +114,7 @@ Jenkins configurations:
 → Number of executors: 0   
 → Save
 
+// Automated:
 - Manage Jenkins → Plugins → Available  
   → install 'Kubernetes' Plugin  
   → Restart Jenkins  

@@ -14,11 +14,11 @@ spec:
     image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
     resources:
       requests:
-        cpu: "200m"
-        memory: "256Mi"
+        cpu: "300m"
+        memory: "768Mi"
       limits:
-        cpu: "500m"
-        memory: "512Mi"
+        cpu: "1000m"
+        memory: "1.5Gi"
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json

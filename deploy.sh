@@ -102,8 +102,19 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 # # ps aux | grep port-forward
 # # kill 43329  or ->
 # # pkill -f "port-forward svc/nexus-service"
-# # 6. frontend
-# # kubectl apply -f kubernetes/frontend/ -n frontend
+
+# # 6. Frontend / Backend 
+# kubectl apply -f argocd/frontend-app.yaml
+# kubectl apply -f argocd/backend-app.yaml
+
+
+# echo "=== 7. Jenkins (builds images, pushes to Nexus) ==="
+# kubectl apply -f kubernetes/jenkins/
+# kubectl wait --for=condition=Ready pod/jenkins-0 -n jenkins-ns --timeout=180s
+
+# echo "=== 8. ArgoCD (deploys from Git, pulls images from Nexus) ==="
+# kubectl apply -f kubernetes/argocd-install/
+# kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=180s
 
 
 # kubectl apply -f kubernetes/jenkins -n jenkins-ns

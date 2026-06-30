@@ -17,13 +17,38 @@ spec:
       #       fsGroup: 1000 
       #       runAsUser: 1000
       serviceAccountName: jenkins-admin
+
+      
+      # initContainer installs plugins BEFORE jenkins starts
+      initContainers:
+        - name: install-plugins
+          image: jenkins/jenkins:lts-jdk21
+          command:
+            - jenkins-plugin-cli
+            - --plugins
+            - "kubernetes generic-webhook-trigger workflow-aggregator git github configuration-as-code"
+          env:
+            - name: JAVA_OPTS
+              value: "-Xmx512m"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "400Mi"
+            limits:
+              cpu: "500m"
+              memory: "768Mi"
+          volumeMounts:
+            - name: jenkins-vol
+              mountPath: /var/jenkins_home
+
+
       containers:
         - name: jenkins
           image: jenkins/jenkins:lts-jdk21
           imagePullPolicy: Always
           env:
           - name: JAVA_OPTS
-            value: "-Xms512m -Xms256m -XX:+UseG1GC"  # mem for JVM from 512mb-2gb
+            value: "-Xms512m -Xmx1g -XX:+UseG1GC"  # mem for JVM from 512mb-2gb
           resources:
             requests:
               memory: "512Mi"
