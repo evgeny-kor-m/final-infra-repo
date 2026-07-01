@@ -23,7 +23,7 @@ Deploy a complete monitoring and observability solution.
 
 Requirements:
 Deploy ELK Stack inside Kubernetes.
-
+```
 Components:  
 | Component     | Type         | Purpose:          |
 ---------------------------------------------------|
@@ -34,7 +34,7 @@ Components:
 | Metricbeat    | Daemon Set   | metric collection | 
 | APM Server    | Deployment   | trace collection  |
 |--------------------------------------------------|
-
+```
 
 ### Monitoring Requirements:
 The platform must collect:
