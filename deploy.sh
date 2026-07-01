@@ -113,7 +113,7 @@ kubectl apply -f kubernetes/mongo-express/ -n database
 # kubectl wait --for=condition=Ready pod/jenkins-0 -n jenkins-ns --timeout=180s
 
 # echo "=== 8. ArgoCD (deploys from Git, pulls images from Nexus) ==="
-# kubectl apply -f kubernetes/argocd-install/
+# kubectl apply -n argocd -f ./argocd/install.yaml
 # kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=180s
 
 

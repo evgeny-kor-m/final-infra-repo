@@ -1,4 +1,6 @@
-# Resource budget for ArgoCD namespace (server, repo-server, app controller, dex, redis, etc.)
+# Resource budget for ArgoCD namespace
+# Components: argocd-server, repo-server, application-controller, dex-server,
+# redis, applicationset-controller, notifications-controller (7 pods total)
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -6,10 +8,10 @@ metadata:
   namespace: argocd
 spec:
   hard:
-    requests.cpu: "250m"
-    requests.memory: "600Mi"
-    limits.cpu: "500m"
-    limits.memory: "850Mi"
+    requests.cpu: "700m"
+    requests.memory: "900Mi"
+    limits.cpu: "1.5"          # bumped from 1 - 7 pods at 150m default exceed previous limit
+    limits.memory: "1.4Gi"
 ---
 apiVersion: v1
 kind: LimitRange
@@ -19,9 +21,9 @@ metadata:
 spec:
   limits:
   - default:
-      cpu: "100m"
-      memory: "180Mi"
+      cpu: "150m"
+      memory: "200Mi"
     defaultRequest:
-      cpu: "40m"
-      memory: "90Mi"
+      cpu: "60m"
+      memory: "100Mi"
     type: Container

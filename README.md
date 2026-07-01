@@ -110,6 +110,8 @@ rs.status()
 ```
 Example :  https://oneuptime.com/blog/post/2026-01-25-mongodb-replica-sets-kubernetes/view   
 
+kubectl scale statefulset mongodb -n database --replicas=1
+
 #### Craete Mongo Express viewer
 ```
 kubectl apply -f kubernetes/mongo-express -n database

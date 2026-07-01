@@ -48,14 +48,14 @@ spec:
           imagePullPolicy: Always
           env:
           - name: JAVA_OPTS
-            value: "-Xms512m -Xmx1g -XX:+UseG1GC"  # mem for JVM from 512mb-2gb
+            value: "-Xms256m -Xmx512m -XX:+UseG1GC"  # mem for JVM from 512mb-2gb
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "400Mi"
+              cpu: "200m"      
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: "700Mi"  
+              cpu: "500m"      
           ports:
             - name: http-port
               containerPort: 8080
@@ -65,18 +65,18 @@ spec:
             httpGet:
               path: "/login"
               port: 8080
-            initialDelaySeconds: 90
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 5
+            initialDelaySeconds: 120      # было 90 - дать больше времени на полный старт
+            periodSeconds: 20             # было 10 - реже проверять
+            timeoutSeconds: 15            # было 5 - больше времени на ответ при нагрузке
+            failureThreshold: 8           # было 5 - больше попыток перед убийством
           readinessProbe:
             httpGet:
               path: "/login"
               port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            initialDelaySeconds: 90       # было 60
+            periodSeconds: 20             # было 10
+            timeoutSeconds: 15            # было 5
+            failureThreshold: 5           # было 3
 
           volumeMounts:
             - name: jenkins-vol

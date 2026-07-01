@@ -7,8 +7,10 @@ https://oneuptime.com/blog/post/2026-02-02-argocd-applications/view
 
 kubectl create namespace argocd
 
+kubectl apply -f kubernetes/limit-quotas/argocd.yaml
+
 # Install crd
-kubectl apply -f ./argocd/applicationset-crd.yaml --server-side
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.4/manifests/crds/applicationset-crd.yaml --server-side
 # Check
 kubectl get crd | grep argoproj
     applications.argoproj.io      2026-06-28T08:49:17Z
@@ -16,8 +18,8 @@ kubectl get crd | grep argoproj
     appprojects.argoproj.io       2026-06-28T08:49:17Z
 
 # Run ArgoCD manifest
-kubectl apply -n argocd -f ./argocd/install.yaml
-kubectl -n argocd get all,secrets,svc,configmap,crd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.4/manifests/install.yaml --server-side --force-conflicts
+kubectl -n argocd get all,secrets,svc,configmap,crd,application
 
 # Run the NodePort locally
 # kubectl patch svc argocd-server -n argocd   -p '{"spec": {"type": "NodePort"}}'
@@ -32,7 +34,7 @@ kubectl get svc -n argocd -o wide --watch
 # http://localhost:8085
 
 User: admin
-Password: from command (DylNriEKQEa8k-nm)
+Password: from command (2LJ-PAcQxifE6yP3)
 
 # Generate the password and type into login page of argocd
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d

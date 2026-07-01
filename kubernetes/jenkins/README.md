@@ -252,7 +252,7 @@ Fill:
 - Repository URL → https://github.com/evgeny-kor-m/final-infra-repo.git  
 - Credentials → select (github-infra-cred)
 - Branch → */main
-- Script Path → pipelines/prepare.Jenknisfile
+- Script Path → pipelines/prepare.Jenkinsfile
 ```
 #### prepare.Jenkinsfile
 ```

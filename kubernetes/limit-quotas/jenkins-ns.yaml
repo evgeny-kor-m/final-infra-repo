@@ -1,5 +1,4 @@
 # Resource budget for Jenkins namespace (Jenkins controller + dynamic CI build agents)
-# Controller resources kept minimal since it's mostly idle; agent gets headroom for npm build
 apiVersion: v1
 kind: ResourceQuota
 metadata:
@@ -8,9 +7,9 @@ metadata:
 spec:
   hard:
     requests.cpu: "700m"
-    requests.memory: "1.4Gi"   # controller ~400Mi + build agent ~768Mi + buffer
+    requests.memory: "1.4Gi"
     limits.cpu: "1.5"
-    limits.memory: "2.2Gi"     # controller ~700Mi + build agent ~1.5Gi
+    limits.memory: "2.4Gi"   # bumped slightly: 768Mi (controller) + 1536Mi (agent) + small buffer
 ---
 apiVersion: v1
 kind: LimitRange
