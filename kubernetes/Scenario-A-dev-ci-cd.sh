@@ -3,6 +3,8 @@ kubectl scale statefulset elasticsearch-master -n monitoring --replicas=0
 kubectl scale statefulset logstash-logstash -n monitoring --replicas=0
 kubectl scale deployment kibana-kibana -n monitoring --replicas=0
 kubectl scale deployment apm-server-apm-server -n monitoring --replicas=0
+kubectl scale deployment metricbeat-kube-state-metrics -n monitoring --replicas=0
+kubectl scale deployment metricbeat-metricbeat-metrics -n monitoring --replicas=0
 
 # DaemonSet
 kubectl patch daemonset filebeat-filebeat -n monitoring \
@@ -12,6 +14,7 @@ kubectl patch daemonset metricbeat-metricbeat -n monitoring \
 
 # scale-up-argo-jenkins-nexus 
 # Switch back to Scenario A (CI/CD):
+kubectl scale statefulset mongodb -n database --replicas=3
 kubectl scale statefulset jenkins -n jenkins-ns --replicas=1
 kubectl scale statefulset nexus -n nexus-ns --replicas=1
 kubectl scale statefulset argocd-application-controller -n argocd --replicas=1

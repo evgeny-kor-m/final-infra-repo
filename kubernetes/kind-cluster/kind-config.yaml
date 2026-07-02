@@ -4,9 +4,18 @@ nodes:
 # Control plane node - API server, scheduler, controller
 - role: control-plane
   image: kindest/node:v1.31.0
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
   extraPortMappings:
-  - containerPort: 30000      # port inside the kind container (Node port)
-    hostPort: 30000           # port on your local machine (WSL/Windows)
+  - containerPort: 80
+    hostPort: 80
+    listenAddress: "0.0.0.0"
+  - containerPort: 443        # port inside the kind container (Node port)
+    hostPort: 443             # port on your local machine (WSL/Windows)
     listenAddress: "0.0.0.0"  # listen on all interfaces
 
 - role: worker

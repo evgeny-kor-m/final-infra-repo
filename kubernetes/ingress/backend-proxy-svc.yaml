@@ -1,0 +1,13 @@
+# ExternalName service in frontend namespace
+# Acts as a DNS alias to backend-service in backend namespace
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-proxy
+  namespace: frontend
+spec:
+  type: ExternalName
+  externalName: backend-service.backend.svc.cluster.local
+  ports:
+  - port: 5000
+    targetPort: 5000

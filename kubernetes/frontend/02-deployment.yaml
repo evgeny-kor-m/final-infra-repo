@@ -24,16 +24,16 @@ spec:
         imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
         ports:
         - containerPort: 3000
+                           
+        volumeMounts:
+        - name: config-js
+          mountPath: /app/dist/config.js
+          subPath: config.js
 
-        env: 
-        # From ConfigMap    
-        - name: API_URL
-          valueFrom:
-            configMapKeyRef:
-              name: frontend-cm
-              key: BACKEND_URL 
-                                  
-        envFrom:
-        # All keys from app-config become environment variables
-        - configMapRef:
-            name: frontend-cm
+      volumes:
+      - name: config-js
+        configMap:
+          name: frontend-cm
+          items:
+          - key: config.js
+            path: config.js

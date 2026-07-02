@@ -94,7 +94,8 @@ Configure the Job in Jenkins to catch webhook only
 ```
 Dashboard -> ci_pipeline -> Configure
 Triggers:
-[ ] - clean - not selected nothing
+→ [v] Generic Webhook Trigger
+→ Token: build-token
 Pipeline -> Definition -> Pipeline script from SCM
 Fill:
 - SCM -> Git

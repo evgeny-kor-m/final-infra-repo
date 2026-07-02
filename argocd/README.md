@@ -33,11 +33,12 @@ kubectl get svc -n argocd -o wide --watch
 # Go to the Browser and login to the ArgoCD
 # http://localhost:8085
 
-User: admin
-Password: from command (2LJ-PAcQxifE6yP3)
-
 # Generate the password and type into login page of argocd
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d ; echo
+
+User: admin
+Password: from command (a-DtRSJ7fTZGEffY)
+
 
 # Install secret
 kubectl apply -f ./kubernetes/secrets/infra-repo-secret.yaml
