@@ -1,4 +1,4 @@
-Схема:
+Schema:
 browser
   |
   | http://localhost:80
@@ -11,9 +11,9 @@ ingress-nginx (control-plane, port 80)
                       |
                       ▼ (DNS alias)
                backend-service.backend.svc.cluster.local:5000
-И config.js меняется на:
+config.js changed on:
 javascriptwindow.APP_CONFIG = {
-  API_URL: '/api'   // относительный путь — работает везде!
+  API_URL: '/api' 
 }
 
 ### 1. Install ingress-nginx controller:

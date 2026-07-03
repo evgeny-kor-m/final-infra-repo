@@ -23,7 +23,7 @@ spec:
         image: nexus-service.nexus-ns.svc.cluster.local:8083/frontend-image:f0262d3b37dc8064d2958bd822a9886e977618ad
         imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
         ports:
-        - containerPort: 3000
+        - containerPort: 80 # 3000
                            
         volumeMounts:
         - name: config-js
