@@ -26,16 +26,27 @@ spec:
 
         env:
         # From Secret
-        - name: DB_USERNAME                   # 
+        - name: DB_ReadWrite_User                   # 
           valueFrom:
             secretKeyRef:
               name: backend-secret
-              key: DB_USERNAME
-        - name: DB_PASSWORD                   # 
+              key: DB_ReadWrite_User
+        - name: DB_ReadWrite_Pass                   # 
           valueFrom:
             secretKeyRef:
               name: backend-secret
-              key: DB_PASSWORD   
+              key: DB_ReadWrite_Pass   
+        - name: DB_ReadOnly_User                   # 
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_ReadOnly_User
+        - name: DB_ReadOnly__Pass                   # 
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: DB_ReadOnly__Pass  
+      
         # From ConfigMap    
         - name: DB_CONNECT_STR
           valueFrom:
