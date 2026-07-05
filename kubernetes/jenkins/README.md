@@ -130,6 +130,7 @@ Create a service account, role, and role binding inside your dedicated Jenkins n
   → Kubernetes Namespace: jenkins-ns
   → Jenkins URL: http://jenkins-service.jenkins-ns.svc.cluster.local:8080
   → Jenkins tunnel: jenkins-service.jenkins-ns.svc.cluster.local:50000
+  → Concurrency Limit: 2     # The maximum number of concurrently running agent pods that are permitted in this Kubernetes Cloud
   → Test Connection  -> Connected to Kubernetes v1.31.0
   → Restart Jenkins
 ```
