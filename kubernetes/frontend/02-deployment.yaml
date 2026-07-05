@@ -26,8 +26,8 @@ spec:
         - containerPort: 80 # 3000
                            
         volumeMounts:
-        - name: config-js
-          mountPath: /app/dist/config.js
+        - mountPath: /usr/share/nginx/html/config.js
+          name: config-js
           subPath: config.js
 
       volumes:
