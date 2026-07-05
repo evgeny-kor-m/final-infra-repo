@@ -20,7 +20,7 @@ spec:
       containers:
       - name: frontend-container
         # image: backend-image:latest
-        image: nexus-service.nexus-ns.svc.cluster.local:8083/frontend-image:d34db6f81f5b488e91f447cc707c6baa0172513b
+        image: nexus-service.nexus-ns.svc.cluster.local:8083/frontend-image:0197fe9a8ee60c72013eaaeee983e13a8cf25686
         imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
         ports:
         - containerPort: 80 # 3000
