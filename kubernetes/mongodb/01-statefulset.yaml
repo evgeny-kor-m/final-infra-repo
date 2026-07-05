@@ -55,7 +55,7 @@ spec:
           tcpSocket:
             port: 27017                     # Is it possible to open a TCP connection
           initialDelaySeconds: 10           # Wait AFTER the container starts before performing the first check.
-          periodSeconds: 10                 # check every 5s
+          periodSeconds: 10                 # check every X-s
           timeoutSeconds: 5                 # fail if no response in 5s
           failureThreshold: 5               # how many failed checks are acceptable
 
