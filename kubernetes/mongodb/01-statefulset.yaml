@@ -51,17 +51,11 @@ spec:
         - name: MONGO_INITDB_DATABASE       # initial database name to create
           value: "hoteldb"
 
-        readinessProbe:                     # checks if pod is ready to receive traffic
-          exec:
-            command:
-              - mongosh
-              - --eval
-              - "db.adminCommand('ping')"
-          initialDelaySeconds: 5           # wait 5s after start before first check
-          periodSeconds: 5                 # check every 5s
-          timeoutSeconds: 3                # fail if no response in 3s
-          successThreshold: 1              # 1 success = ready
-          failureThreshold: 6              # 6 failures = not ready, remove from Service
+        readinessProbe:
+          tcpSocket:
+            port: 27017                     # Is it possible to open a TCP connection
+          periodSeconds: 10                 # check every 5s
+          timeoutSeconds: 5                 # fail if no response in 5s
 
       volumes:
       - name: mongodb-keyfile               # shared secret key for inter-node auth in Replica Set
