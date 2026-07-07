@@ -12,6 +12,7 @@ spec:
   containers:
   - name: jnlp
     image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
+    imagePullPolicy: Always
     env:
       - name: JAVA_OPTS
         value: "-Djdk.lang.Process.launchMechanism=VFORK"
