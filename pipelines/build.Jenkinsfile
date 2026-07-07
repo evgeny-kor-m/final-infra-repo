@@ -11,7 +11,7 @@ spec:
   - name: nexus-registry-secret
   containers:
   - name: jnlp
-    image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:v6
+    image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:v7
     imagePullPolicy: Always
     resources:
       requests:
