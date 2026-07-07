@@ -152,7 +152,6 @@ spec:
                 ]
             }
         }
-    
     }
     post {
     failure {
