@@ -34,7 +34,6 @@ spec:
                 }
      }
     
-    
     options { timeout(time: 10, unit: 'MINUTES') }
     triggers {
         GenericTrigger(
@@ -106,9 +105,6 @@ spec:
                         echo "=== /tmp/build_context content ==="
                         ls -la /tmp/build_context
                         
-                        echo "=== requirements.txt exists? ==="
-                        ls -la /tmp/build_context/requirements.txt || echo "NOT FOUND!"
-
                         /kaniko/executor \
                             --context /tmp/build_context \
                             --dockerfile /tmp/build_context/Dockerfile \
@@ -121,6 +117,31 @@ spec:
                             --snapshot-mode=redo
                     """
             }
+        stage('Scan stage') {
+            steps {
+                script {
+                    def scanStatus = sh(
+                        script: """
+                            trivy client \
+                            --remote http://trivy-service.nexus-ns.svc.cluster.local:4954 \
+                            image \
+                            --severity HIGH,CRITICAL \
+                            --exit-code 1 \
+                            --format json \
+                            --output trivy-report.json \
+                            --insecure \
+                            nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}
+                        """,
+                        returnStatus: true
+                    )
+                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+
+                    if (scanStatus != 0) {
+                        error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}. Pipeline stopped.")
+                    }
+                }
+            }
+        }
         }
         stage('# ---- Trigger cd-pipeline /Job Name/ ---- #') {
             steps {
@@ -131,5 +152,23 @@ spec:
                 ]
             }
         }
+    
+    }
+    post {
+    failure {
+        emailext (
+            subject: "Security Scan Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+            body: """
+                <p>High/Critical vulnerability detected in image:</p>
+                <p><b>${env.IMAGE_NAME}:${env.COMMIT_SHA}</b></p>
+                <p>Deploy has been blocked — cd-pipeline was NOT triggered.</p>
+                <p>Build log: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+                <p>See attached Trivy report for details.</p>
+            """,
+            mimeType: 'text/html',
+            to: "evgeny.korchev@gmail.com",
+            attachmentsPattern: 'trivy-report.json'
+        )
+    }
     }
 }

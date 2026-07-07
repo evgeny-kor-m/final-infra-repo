@@ -12,8 +12,10 @@ WORKDIR /home/jenkins
 
 # Copy Kaniko executor
 COPY --from=gcr.io/kaniko-project/executor:latest /kaniko /kaniko
-
 ENV PATH=$PATH:/kaniko
+
+# Trivy client (for client-server mode - accesses trivy-server in nexus-ns)
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
 # Create kaniko dir
 # Fix permissions for kaniko user

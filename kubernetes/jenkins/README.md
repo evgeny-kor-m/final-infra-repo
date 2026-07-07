@@ -52,7 +52,7 @@ kubectl create secret docker-registry nexus-registry-secret \
 ```
 ### Create Docker image based on Alpine OS for the Jenkins Slave
 ```
-docker build -t jenkins-inbound-agent-image:latest -f ./kubernetes/jenkins/jenkins-slave/Dockerfile .
+docker build -t jenkins-inbound-agent-image:latest -f ./kubernetes/jenkins/Dockerfile .
 
 # Push to Nexus
 kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
@@ -280,4 +280,33 @@ CD Pipeline:
 main ← updated
 ```
 
+### Email Extension Plugin 
+```
+Manage Jenkins → Plugins → "Email Extension"
+Install
 
+Basic SMTP setup (if you use Gmail)
+First, get an App Password from Google:
+myaccount.google.com → Security → 2-Step Verification (must be enabled)
+→ App passwords → Generate → select "Mail" → copy the 16-digit password
+
+SMTP is configured in 
+Manage Jenkins → System → 
+Extended E-mail Notification:
+Field Value SMTP servers:  mtp.gmail.com 
+SMTP Port 465 Use SMTP Authentication ✅ 
+User Name evgeny.korchev@gmail.com 
+Password 16-character password (without spaces - Jenkins usually accepts both with and without spaces, but it's cleaner to insert them together) 
+Use SSL ✅ 
+Default Content: Type HTML (text/html)
+---
+E-mail Notification: 
+User Name evgeny.korchev@gmail.com
+Password16-значный App Password 
+Use SSL✅ 
+Use TLSоставь empty
+SMTP Port 465
+Reply-To Address evgeny.korchev@gmail.com
+Charsetоставь UTF-8
+- Test configuration
+``` 

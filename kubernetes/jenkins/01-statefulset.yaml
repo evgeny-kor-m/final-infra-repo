@@ -46,16 +46,16 @@ spec:
         - name: jenkins
           image: jenkins/jenkins:lts-jdk21
           imagePullPolicy: Always
-          env:
-          - name: JAVA_OPTS
-            value: "-Xms256m -Xmx512m -XX:+UseG1GC"  # mem for JVM from 512mb-2gb
           resources:
             requests:
-              memory: "400Mi"
-              cpu: "200m"      
+              cpu: "200m"
+              memory: "512Mi"
             limits:
-              memory: "700Mi"  
-              cpu: "500m"      
+              cpu: "500m"
+              memory: "1Gi"
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx600m -XX:+UseG1GC -XX:MaxRAMPercentage=75.0"  
           ports:
             - name: http-port
               containerPort: 8080
