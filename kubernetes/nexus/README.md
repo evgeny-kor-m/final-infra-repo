@@ -88,3 +88,17 @@ docker push 172.26.13.131:8083/backend-image:latest
 docker tag frontend-image:latest 172.26.13.131:8083/frontend-image:latest
 docker push 172.26.13.131:8083/frontend-image:latest
 ```
+
+## Image Scanning and Vulnerability Analysis
+
+Trivy remains the right choice because:
+
+It doesn't require a database or server—it's just a binary in the agent pod (critical with 6GB of RAM).
+--exit-code 1 provides the desired "fail pipeline" behavior out of the box without any additional logic.
+The only free tool that scans both OS layers and application dependencies equally well (Flask backend + React frontend).
+
+https://oneuptime.com/blog/post/2026-02-02-trivy-container-scanning/view  
+https://oneuptime.com/blog/post/2026-01-27-trivy-kubernetes-security/view#installing-the-trivy-operator
+
+kubectl apply -f ./kubernetes/nexus/ -n nexus-ns
+kubectl rollout restart deployment/trivy-server -n nexus-ns

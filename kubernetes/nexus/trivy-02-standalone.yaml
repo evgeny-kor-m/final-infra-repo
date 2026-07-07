@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trivy-server
+  namespace: nexus-ns
+  labels:
+    app: trivy-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trivy-server
+  template:
+    metadata:
+      labels:
+        app: trivy-server
+    spec:
+      containers:
+        - name: trivy
+          image: aquasec/trivy:latest
+          imagePullPolicy: IfNotPresent
+          command: ["trivy", "server", "--listen", "0.0.0.0:4954"] # starts Trivy in server mode (client-server), listening in all pod interfaces on port 4954
+          ports:
+            - containerPort: 4954
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            tcpSocket:
+              port: 4954
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 4954
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          env:
+            - name: TRIVY_CACHE_DIR
+              value: "/var/lib/trivy"
+          volumeMounts:
+            - name: trivy-cache
+              mountPath: /var/lib/trivy
+
+      volumes:
+        - name: trivy-cache
+          persistentVolumeClaim:
+            claimName: trivy-cache-pvc

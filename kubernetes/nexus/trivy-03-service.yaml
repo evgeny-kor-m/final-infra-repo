@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trivy-service
+  namespace: nexus-ns
+  labels:
+    app: trivy-server
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4954
+      targetPort: 4954
+      protocol: TCP
+  selector:
+    app: trivy-server
