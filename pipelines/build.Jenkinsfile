@@ -173,6 +173,7 @@ spec:
                 """,
                 mimeType: 'text/html',
                 to: "evgeny.korchev@gmail.com"
+                attachmentsPattern: 'trivy-report.json'
             )
         }
         // failure {
