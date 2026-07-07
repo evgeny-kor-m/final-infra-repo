@@ -52,14 +52,14 @@ kubectl create secret docker-registry nexus-registry-secret \
 ```
 ### Create Docker image based on Alpine OS for the Jenkins Slave
 ```
-docker build -t jenkins-inbound-agent-image:latest -f ./kubernetes/jenkins/Dockerfile .
+docker build --no-cache -t jenkins-inbound-agent-image:v3 -f ./kubernetes/jenkins/Dockerfile .
 
 # Push to Nexus
 kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
 
 docker login 172.26.13.131:8083 -u admin -p nexusadmin
-docker tag jenkins-inbound-agent-image:latest  172.26.13.131:8083/jenkins-inbound-agent-image:latest 
-docker push 172.26.13.131:8083/jenkins-inbound-agent-image:latest
+docker tag jenkins-inbound-agent-image:v3  172.26.13.131:8083/jenkins-inbound-agent-image:v3 
+docker push 172.26.13.131:8083/jenkins-inbound-agent-image:v3
 ```
 #### Configure Ngrok  
 install ngrok in order to create static IP and proxy to your computer.  
