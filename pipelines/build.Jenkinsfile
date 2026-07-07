@@ -13,9 +13,6 @@ spec:
   - name: jnlp
     image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:v6
     imagePullPolicy: Always
-    env:
-      - name: JAVA_OPTS
-        value: "-Djdk.lang.Process.launchMechanism=VFORK"
     resources:
       requests:
         cpu: "300m"
@@ -27,6 +24,17 @@ spec:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json
       subPath: config.json
+  - name: trivy
+    image: aquasec/trivy:0.71.1
+    command: ["sleep"]
+    args: ["9999999"]
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
   volumes:
   - name: kaniko-secret
     secret:
@@ -124,26 +132,20 @@ spec:
         }
         stage('Scan stage') {
             steps {
-                script {
-                    def scanStatus = sh(
-                        script: """
-                            /usr/local/bin/trivy client \
-                            --remote http://trivy-service.nexus-ns.svc.cluster.local:4954 \
-                            image \
-                            --severity HIGH,CRITICAL \
-                            --exit-code 1 \
-                            --format json \
-                            --output trivy-report.json \
-                            --insecure \
-                            nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}
-                        """,
-                        returnStatus: true
-                    )
-                    if (scanStatus == 127) {
-                        error("Trivy binary not found at /usr/local/bin/trivy — check agent image build.")
-                    } else if (scanStatus != 0) {
+                container('trivy') {
+                    script {
+                        def scanStatus = sh(
+                            script: """
+                                trivy image --insecure --severity HIGH,CRITICAL --exit-code 1 \
+                                --format json --output trivy-report.json \
+                                nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}
+                            """,
+                            returnStatus: true
+                        )
                         archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
-                        error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}.")
+                        if (scanStatus != 0) {
+                            error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}.")
+                        }
                     }
                 }
             }
