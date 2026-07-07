@@ -161,19 +161,25 @@ spec:
         }
     }
     post {
-    failure {
-        emailext (
-            subject: "Security Scan Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-            body: """
-                <p>High/Critical vulnerability detected in image:</p>
-                <p><b>${env.IMAGE_NAME}:${env.COMMIT_SHA}</b></p>
-                <p>Deploy has been blocked — cd-pipeline was NOT triggered.</p>
-                <p>Build log: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
-                <p>See attached Trivy report for details.</p>
-            """,
-            mimeType: 'text/html',
-            to: "evgeny.korchev@gmail.com"
-        )
-    }
+        // failure {
+        //     emailext (
+        //         subject: "Security Scan Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        //         body: """
+        //             <p>High/Critical vulnerability detected in image:</p>
+        //             <p><b>${env.IMAGE_NAME}:${env.COMMIT_SHA}</b></p>
+        //             <p>Deploy has been blocked — cd-pipeline was NOT triggered.</p>
+        //             <p>Build log: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>
+        //             <p>See attached Trivy report for details.</p>
+        //         """,
+        //         mimeType: 'text/html',
+        //         to: "evgeny.korchev@gmail.com"
+        //     )
+        // }
+        failure {
+            // Sends an email only to the person who broke the build and the project developers
+            emailext subject: "BROKEN BUILD: Job ",
+                     body: "Please check the console output at ${env.BUILD_URL} to fix the breakdown.",
+                     to: "evgeny.korchev@gmail.com"
+        }
     }
 }
