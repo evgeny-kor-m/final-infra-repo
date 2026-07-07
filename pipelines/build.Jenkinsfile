@@ -16,10 +16,10 @@ spec:
     resources:
       requests:
         cpu: "300m"
-        memory: "768Mi"
+        memory: "512Mi"
       limits:
-        cpu: "1000m"
-        memory: "1200Mi"
+        cpu: "700m"
+        memory: "1000Mi"
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json
@@ -31,10 +31,10 @@ spec:
     resources:
       requests:
         cpu: "100m"
-        memory: "256Mi"
+        memory: "128Mi"
       limits:
-        cpu: "500m"
-        memory: "512Mi"
+        cpu: "300m"
+        memory: "400Mi"
   volumes:
   - name: kaniko-secret
     secret:
