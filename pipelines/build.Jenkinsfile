@@ -139,10 +139,11 @@ spec:
                         """,
                         returnStatus: true
                     )
-                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
-
-                    if (scanStatus != 0) {
-                        error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}. Pipeline stopped.")
+                    if (scanStatus == 2) {
+                        error("Trivy not found in agent image — check Dockerfile/build.")
+                    } else if (scanStatus != 0) {
+                        archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                        error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}.")
                     }
                 }
             }
