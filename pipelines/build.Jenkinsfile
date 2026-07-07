@@ -125,9 +125,10 @@ spec:
         stage('Scan stage') {
             steps {
                 script {
+                    sh 'echo "PATH is: $PATH"; ls -la /usr/local/bin/ | grep trivy'
                     def scanStatus = sh(
                         script: """
-                            trivy client \
+                            /usr/local/bin/trivy client \
                             --remote http://trivy-service.nexus-ns.svc.cluster.local:4954 \
                             image \
                             --severity HIGH,CRITICAL \
@@ -139,8 +140,8 @@ spec:
                         """,
                         returnStatus: true
                     )
-                    if (scanStatus == 2) {
-                        error("Trivy not found in agent image — check Dockerfile/build.")
+                    if (scanStatus == 127) {
+                        error("Trivy binary not found at /usr/local/bin/trivy — check agent image build.")
                     } else if (scanStatus != 0) {
                         archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
                         error("HIGH/CRITICAL vulnerabilities found in ${env.IMAGE_NAME}:${env.COMMIT_SHA}.")
