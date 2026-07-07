@@ -172,8 +172,7 @@ spec:
                 <p>See attached Trivy report for details.</p>
             """,
             mimeType: 'text/html',
-            to: "evgeny.korchev@gmail.com",
-            attachmentsPattern: 'trivy-report.json'
+            to: "evgeny.korchev@gmail.com"
         )
     }
     }
