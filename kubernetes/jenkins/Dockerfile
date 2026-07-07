@@ -6,7 +6,9 @@ RUN apk update && apk add --no-cache \
     bash \
     curl \
     ca-certificates \
-    github-cli
+    github-cli \
+    gcompat \
+    libc6-compat
 
 WORKDIR /home/jenkins
 

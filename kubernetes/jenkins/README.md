@@ -52,7 +52,7 @@ kubectl create secret docker-registry nexus-registry-secret \
 ```
 ### Create Docker image based on Alpine OS for the Jenkins Slave
 ```
-docker build --no-cache -t jenkins-inbound-agent-image:v3 -f ./kubernetes/jenkins/Dockerfile .
+docker build --no-cache --provenance=false -t jenkins-inbound-agent-image:v3 -f ./kubernetes/jenkins/Dockerfile .
 
 # Push to Nexus
 kubectl port-forward svc/nexus-service 8082:8081 8083:8083 -n nexus-ns --address=0.0.0.0
