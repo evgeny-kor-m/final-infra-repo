@@ -11,7 +11,7 @@ spec:
   - name: nexus-registry-secret
   containers:
   - name: jnlp
-    image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:latest
+    image: nexus-service.nexus-ns.svc.cluster.local:8083/jenkins-inbound-agent-image:v2
     imagePullPolicy: Always
     env:
       - name: JAVA_OPTS
@@ -125,7 +125,8 @@ spec:
         stage('Scan stage') {
             steps {
                 script {
-                    sh 'echo "PATH is: $PATH"; ls -la /usr/local/bin/ | grep trivy'
+                    sh 'echo "PATH is: $PATH"; ls -la /usr/local/bin/ | grep trivy; which trivy; trivy --version'
+
                     def scanStatus = sh(
                         script: """
                             /usr/local/bin/trivy client \
