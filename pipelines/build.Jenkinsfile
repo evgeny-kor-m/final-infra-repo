@@ -122,6 +122,11 @@ spec:
                     """
             }
         }
+        stage('DEBUG - pause for inspection') {
+            steps {
+                sh 'sleep 180'
+            }
+        }
         stage('Scan stage') {
             steps {
                 script {
