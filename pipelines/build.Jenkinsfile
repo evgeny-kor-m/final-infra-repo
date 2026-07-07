@@ -18,7 +18,7 @@ spec:
         memory: "768Mi"
       limits:
         cpu: "1000m"
-        memory: "1.5Gi"
+        memory: "1200Mi"
     volumeMounts:
     - name: kaniko-secret
       mountPath: /kaniko/.docker/config.json
