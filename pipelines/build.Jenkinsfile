@@ -117,6 +117,7 @@ spec:
                             --snapshot-mode=redo
                     """
             }
+        }
         stage('Scan stage') {
             steps {
                 script {
@@ -141,7 +142,6 @@ spec:
                     }
                 }
             }
-        }
         }
         stage('# ---- Trigger cd-pipeline /Job Name/ ---- #') {
             steps {
