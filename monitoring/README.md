@@ -10,11 +10,12 @@ https://medium.com/@muppedaanvesh/a-hands-on-guide-to-kubernetes-logging-using-e
 # 
 ```
 kubectl apply -f kubernetes/limit-quotas/monitoring.yaml
-## Scale Down
-./kubernetes/scale-down-argo-jenkins-nexus.sh 
 
-## Scale Up
-./kubernetes/scale-up-argo-jenkins-nexus.sh 
+## Scale Down & Scale Up
+./kubernetes/Scenario-B-monitoring.sh 
+
+
+
 
 ```
 
@@ -132,9 +133,9 @@ helm install apm-server elastic/apm-server --version 8.5.1 -n monitoring -f moni
 
 # 3. Log in to Kibana:
   # username
-  kubectl get secret -n monitoring elasticsearch-master-credentials -o jsonpath="{.data.username}" | base64 --decode
+  kubectl get secret -n monitoring elasticsearch-master-credentials -o jsonpath="{.data.username}" | base64 --decode ; echo 
   # password
-  kubectl get secret -n monitoring elasticsearch-master-credentials -o jsonpath="{.data.password}" | base64 --decode
+  kubectl get secret -n monitoring elasticsearch-master-credentials -o jsonpath="{.data.password}" | base64 --decode ; echo
 ```
 ### Step 8: Check Elasticsearch Cluster Health
 ```
@@ -148,7 +149,8 @@ http://localhost:5601
 
 Check in Kibana:
 Go to Management → Stack Management → Index Management - the filebeat-* index should appear
-Create an index pattern: Stack Management → Kibana → Data Views → Create data view
+Create an index pattern: 
+Stack Management → Kibana → Data Views → Create data view
 Name:          filebeat-*
 Index pattern: filebeat-*
 Timestamp:     @timestamp
@@ -181,6 +183,9 @@ client = Client({
   'SERVICE_NAME': 'backend',
   'SERVER_URL': 'http://apm-server-apm-server.monitoring.svc.cluster.local:8200'
 })
+
+apm-server-apm-server
+kubectl port-forward -n monitoring svc/apm-server-apm-server 8200:8200
 
 ### All ELK Stack:
 Management → Stack Monitoring → state of Elasticsearch, Logstash, Kibana, Beats   

@@ -7,5 +7,7 @@ data:
   config.js: |
     window.APP_CONFIG = {
       API_URL: '/api'
+      APM_ENABLED: true,
+      APM_SERVER_URL: 'http://localhost:8200'
     }
 
