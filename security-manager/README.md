@@ -14,12 +14,13 @@ helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
 kubectl exec -it openbao-0 -n openbao-ns -- bao status
 kubectl exec -ti openbao-0 -n openbao-ns -- bao operator init
 <!-- Unseal Key 1: PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH
-Unseal Key 2: pB9DCbHbAjTNSKve...<UNSEAL_KEY_1>
-Unseal Key 3: jYtrQFtEzvSyRslx...<UNSEAL_KEY_2>
-Unseal Key 4: E7YxtG14JKg08xm9...<UNSEAL_KEY_3>
-Unseal Key 5: +7YYQamtHifnsQoh...<UNSEAL_KEY_4>
-
-Initial Root Token: <ROOT_TOKEN>
+Unseal Key 1: PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH  
+Unseal Key 2: pB9DCbHbAjTNSKveYVCvM2NHXEcfRkeLA6wLitDIVNJ3  
+Unseal Key 3: jYtrQFtEzvSyRslxoZQyYSuOuiEAAuLXKxQ8cz0hl+aC  
+Unseal Key 4: E7YxtG14JKg08xm9j0wKg0MkAfZJWThEv9Upv2w9SPAV  
+Unseal Key 5: +7YYQamtHifnsQohChO5gtIPrPEMyZgsLco1w9hzJvFg  
+  
+Initial Root Token: s.s6ukuScUSdiepQguWDPkcZ4p  
  -->
 
 Unseal the OpenBao server with the key shares until the key threshold is met:
