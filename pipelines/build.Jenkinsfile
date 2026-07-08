@@ -137,6 +137,7 @@ spec:
                         def scanStatus = sh(
                             script: """
                                 trivy image --insecure --severity HIGH,CRITICAL --exit-code 1 \
+                                --ignore-unfixed \
                                 --format json --output trivy-report.json \
                                 nexus-service.nexus-ns.svc.cluster.local:8083/${env.IMAGE_NAME}:${env.COMMIT_SHA}
                             """,

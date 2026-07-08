@@ -293,7 +293,7 @@ myaccount.google.com → Security → 2-Step Verification (must be enabled)
 SMTP is configured in 
 Manage Jenkins → System → 
 Extended E-mail Notification:
-Field Value SMTP servers:  mtp.gmail.com 
+Field Value SMTP servers:  smtp.gmail.com 
 SMTP Port 465 Use SMTP Authentication ✅ 
 User Name evgeny.korchev@gmail.com 
 Password 16-character password (without spaces - Jenkins usually accepts both with and without spaces, but it's cleaner to insert them together) 
