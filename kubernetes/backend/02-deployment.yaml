@@ -18,6 +18,7 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "backend-role"
         vault.hashicorp.com/agent-inject-secret-mongodb.env: "secret/data/mongodb"
+        vault.hashicorp.com/agent-inject-static-secret-render-interval: "5m"
         vault.hashicorp.com/agent-inject-template-mongodb.env: |
           {{- with secret "secret/data/mongodb" -}}
           export DB_ReadWrite_User="{{ .Data.data.DB_ReadWrite_User }}"

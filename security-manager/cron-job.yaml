@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-password-rotator
+  namespace: backend
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: rotator-sa
+          restartPolicy: Never
+          containers:
+          - name: rotator
+            image: mongo:8.0
+            resources:
+              requests:
+                cpu: "150m"
+                memory: "256Mi"
+              limits:
+                cpu: "400m"
+                memory: "512Mi"
+            command: ["/bin/bash", "-c"]
+            args:
+              - |
+                set -e
+                apt-get update -qq && apt-get install -y -qq curl jq
+
+                JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                BAO_TOKEN=$(curl -s --request POST \
+                  --data "{\"jwt\": \"$JWT\", \"role\": \"rotator-role\"}" \
+                  http://openbao.openbao-ns.svc.cluster.local:8200/v1/auth/kubernetes/login \
+                  | jq -r '.auth.client_token')
+
+                CURRENT=$(curl -s --header "X-Vault-Token: $BAO_TOKEN" \
+                  http://openbao.openbao-ns.svc.cluster.local:8200/v1/secret/data/mongodb \
+                  | jq -r '.data.data')
+
+                RW_USER=$(echo "$CURRENT" | jq -r '.DB_ReadWrite_User')
+                RO_USER=$(echo "$CURRENT" | jq -r '.DB_ReadOnly_User')
+
+                NEW_RW_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=' | head -c 20)
+                NEW_RO_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=' | head -c 20)
+
+                MONGO_URI="mongodb://superadmin:superpassw@mongodb-0.mongodb-headless.database.svc.cluster.local:27017,mongodb-1.mongodb-headless.database.svc.cluster.local:27017,mongodb-2.mongodb-headless.database.svc.cluster.local:27017/admin?replicaSet=rs0"
+
+                mongosh "$MONGO_URI" \
+                  --eval "db.getSiblingDB('admin').updateUser('$RW_USER', {pwd: '$NEW_RW_PASSWORD'})"
+
+                mongosh "$MONGO_URI" \
+                  --eval "db.getSiblingDB('admin').updateUser('$RO_USER', {pwd: '$NEW_RO_PASSWORD'})"
+
+                curl -s --header "X-Vault-Token: $BAO_TOKEN" \
+                  --request POST \
+                  --data "{\"data\": {\"DB_ReadWrite_User\": \"$RW_USER\", \"DB_ReadWrite_Pass\": \"$NEW_RW_PASSWORD\", \"DB_ReadOnly_User\": \"$RO_USER\", \"DB_ReadOnly__Pass\": \"$NEW_RO_PASSWORD\"}}" \
+                  http://openbao.openbao-ns.svc.cluster.local:8200/v1/secret/data/mongodb
+
+                echo "Password rotated successfully for $RW_USER and $RO_USER"
