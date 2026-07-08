@@ -45,16 +45,20 @@ path "secret/data/mongodb" {
 EOF
 bao secrets enable -path=secret kv-v2
 bao kv put secret/mongodb \
-    DB_ReadWrite_User="rw_user" \
-    DB_ReadWrite_Pass="rw_pass_123" \
-    DB_ReadOnly_User="ro_user" \
-    DB_ReadOnly__Pass="ro_pass_123"
+    DB_ReadWrite_User="backend_user" \
+    DB_ReadWrite_Pass="backend_pass" \
+    DB_ReadOnly_User="readonly_user" \
+    DB_ReadOnly__Pass="readonly_pass"
 bao write auth/kubernetes/role/backend-role \
     bound_service_account_names=default \
     bound_service_account_namespaces=backend \
     policies=mongodb-read \
     ttl=1h
-# default ServiceAccount in namespace backend → role backend-role → policy mongodb-read → секрет secret/mongodb.
+# default ServiceAccount in namespace backend → role backend-role → policy mongodb-read → secret secret/mongodb.
+
+# Check :
+kubectl exec -it backend-app-6c665f859d-n8gqp -n backend -c backend-container -- cat /vault/secrets/mongodb.env
+kubectl logs backend-app-6c665f859d-n8gqp -n backend -c backend-container
 ```
 #### Inject secrets into workloads
 1. OpenBao Agent Injector (Vault-compatible sidecar injector that automatically mounts secrets as files in pods via annotations).  

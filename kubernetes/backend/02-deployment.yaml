@@ -40,7 +40,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            source /vault/secrets/mongodb.env
+            . /vault/secrets/mongodb.env
             exec python app_backend.py
 
         ports:
