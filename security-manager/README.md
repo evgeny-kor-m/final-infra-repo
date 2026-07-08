@@ -11,6 +11,7 @@ helm search repo openbao/openbao
 helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
 
 ##### Initialize and unseal OpenBao
+```
 kubectl exec -it openbao-0 -n openbao-ns -- bao status
 kubectl exec -ti openbao-0 -n openbao-ns -- bao operator init
 <!-- Unseal Key 1: PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH
@@ -27,7 +28,7 @@ Unseal the OpenBao server with the key shares until the key threshold is met:
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal pB9DCbHbAjTNSKveYVCvM2NHXEcfRkeLA6wLitDIVNJ3
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal jYtrQFtEzvSyRslxoZQyYSuOuiEAAuLXKxQ8cz0hl+aC
-
+```
 #### Configure authentication between Kubernetes and the secret manager
 ```
 https://openbao.org/docs/auth/kubernetes/
