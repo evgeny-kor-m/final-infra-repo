@@ -5,7 +5,7 @@ https://openbao.org/docs/platform/k8s/helm/run/
 [!] https://medium.com/@PlatformEnthusiast/the-secret-layer-how-openbao-protects-your-kubernetes-cluster-752549c1c620  
 For Enable automatic password every rotation 24h" and "synchronized without manual intervention need the Database Secrets Engine  
 
-#### install
+#### Deploy 
 helm repo add openbao https://openbao.github.io/openbao-helm
 helm search repo openbao/openbao
 helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
@@ -14,12 +14,12 @@ helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
 kubectl exec -it openbao-0 -n openbao-ns -- bao status
 kubectl exec -ti openbao-0 -n openbao-ns -- bao operator init
 <!-- Unseal Key 1: PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH
-Unseal Key 2: pB9DCbHbAjTNSKveYVCvM2NHXEcfRkeLA6wLitDIVNJ3
-Unseal Key 3: jYtrQFtEzvSyRslxoZQyYSuOuiEAAuLXKxQ8cz0hl+aC
-Unseal Key 4: E7YxtG14JKg08xm9j0wKg0MkAfZJWThEv9Upv2w9SPAV
-Unseal Key 5: +7YYQamtHifnsQohChO5gtIPrPEMyZgsLco1w9hzJvFg
+Unseal Key 2: pB9DCbHbAjTNSKve...<UNSEAL_KEY_1>
+Unseal Key 3: jYtrQFtEzvSyRslx...<UNSEAL_KEY_2>
+Unseal Key 4: E7YxtG14JKg08xm9...<UNSEAL_KEY_3>
+Unseal Key 5: +7YYQamtHifnsQoh...<UNSEAL_KEY_4>
 
-Initial Root Token: s.s6ukuScUSdiepQguWDPkcZ4p
+Initial Root Token: <ROOT_TOKEN>
  -->
 
 Unseal the OpenBao server with the key shares until the key threshold is met:
@@ -37,56 +37,139 @@ bao auth enable kubernetes
 # Allows (backend, frontend) pods to authenticate in OpenBao with their own ServiceAccount token, without separate static credentials.
 bao write auth/kubernetes/config \
     kubernetes_host="https://kubernetes.default.svc:443"
+```
+#### Store credentials
+```
+https://openbao.org/docs/concepts/policies/
+
+# default ServiceAccount in namespace backend → role backend-role → policy mongodb-read → secret secret/mongodb.
 
 bao policy write mongodb-read - <<EOF
 path "secret/data/mongodb" {
   capabilities = ["read"]
 }
 EOF
+
+# kv-v2 static storage
 bao secrets enable -path=secret kv-v2
+
 bao kv put secret/mongodb \
     DB_ReadWrite_User="backend_user" \
     DB_ReadWrite_Pass="backend_pass" \
     DB_ReadOnly_User="readonly_user" \
     DB_ReadOnly__Pass="readonly_pass"
+
 bao write auth/kubernetes/role/backend-role \
     bound_service_account_names=default \
     bound_service_account_namespaces=backend \
     policies=mongodb-read \
     ttl=1h
-# default ServiceAccount in namespace backend → role backend-role → policy mongodb-read → secret secret/mongodb.
-
-# Check :
+# ttl=1h — OpenBao token lifetime after pod authentication
+```
+#### Inject into workloads
+```
+# in deployment.yaml
+...
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        # What role should I use when logging into OpenBao
+        vault.hashicorp.com/role: "backend-role"
+        # Where to get the secret and what to name the resulting file (mongodb.env)
+        vault.hashicorp.com/agent-inject-secret-mongodb.env: "secret/data/mongodb"
+        # How to format file contents
+        vault.hashicorp.com/agent-inject-template-mongodb.env: |
+          {{- with secret "secret/data/mongodb" -}}
+          export DB_ReadWrite_User="{{ .Data.data.DB_ReadWrite_User }}"
+          export DB_ReadWrite_Pass="{{ .Data.data.DB_ReadWrite_Pass }}"
+          export DB_ReadOnly_User="{{ .Data.data.DB_ReadOnly_User }}"
+          export DB_ReadOnly__Pass="{{ .Data.data.DB_ReadOnly__Pass }}"
+          {{- end }}
+        vault.hashicorp.com/agent-limits-cpu: "100m"
+        vault.hashicorp.com/agent-limits-mem: "64Mi"
+        vault.hashicorp.com/agent-requests-cpu: "50m"
+        vault.hashicorp.com/agent-requests-mem: "32Mi"
+        # ensures that the init-container will definitely complete before the main container starts
+        vault.hashicorp.com/agent-init-first: "true"
+...
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            . /vault/secrets/mongodb.env
+            exec python app_backend.py
+```
+#### Check :
+```
 kubectl exec -it backend-app-6c665f859d-n8gqp -n backend -c backend-container -- cat /vault/secrets/mongodb.env
 kubectl logs backend-app-6c665f859d-n8gqp -n backend -c backend-container
 ```
-#### Inject secrets into workloads
-1. OpenBao Agent Injector (Vault-compatible sidecar injector that automatically mounts secrets as files in pods via annotations).  
-2. External Secrets Operator (ESO) + OpenBao as a backend — fetches secrets and creates native K8s Secrets, synchronizing regularly.  
-Vault/OpenBao Agent Injector:  
+#### How it works (steps) 
+```
+1. ArgoCD applies the Deployment manifest to the API Server
+   (this is NOT the Pod itself — it's the Deployment object,
+   which has the annotation on its pod template)
+                  │
+                  ▼
+2. Deployment controller creates a ReplicaSet
+   ReplicaSet controller creates the actual Pod object
+   (this is the moment the annotation actually matters —
+   admission control only intercepts Pod creation, not Deployment/ReplicaSet)
+                  │
+                  ▼
+3. The Kubernetes API Server sees a new Pod being created
+   and — per MutatingWebhookConfiguration rules — must ask
+   openbao-agent-injector: "Do you want to change anything in this pod?"
+   (this happens BEFORE the pod is persisted/scheduled)
+                  │
+                  ▼
+4. openbao-agent-injector sees the annotation agent-inject: "true"
+   → generates ADDITIONAL containers in the pod spec on the fly:
+     - init-container (vault-agent-init)
+     - optionally a sidecar (vault-agent), if secret refresh is needed
+   → adds a shared emptyDir volume ("vault-secrets") mounted into all containers
+   → returns the MODIFIED pod manifest to the API Server
+   (at this point, NO actual secret has been fetched yet —
+    only the pod SPEC has been changed)
+                  │
+                  ▼
+5. The pod is scheduled and actually created WITH the added containers
+                  │
+                  ▼
+6. AT POD STARTUP: the init-container runs FIRST
+   → logs into OpenBao via Kubernetes Auth
+     (using role: backend-role from the annotation,
+      authenticating with the pod's own ServiceAccount token)
+   → fetches secret/data/mongodb
+   → renders it using the template from agent-inject-template-mongodb.env
+   → writes the result to /vault/secrets/mongodb.env on the shared volume
+   → exits (agent-init-first: "true" ensures this completes first)
+                  │
+                  ▼
+7. The main container (backend-container) starts,
+   reads /vault/secrets/mongodb.env, and launches the application
+```
 
-#### 
 
 
-3. Хранение секретов — KV или Database secrets engine:
-bashbao secrets enable -path=secret kv-v2
-bao kv put secret/mongodb password="..." username="..."
-Для настоящей авто-ротации (не просто хранения) — лучше Database Secrets Engine, который умеет сам генерировать новые креды для MongoDB по расписанию:
-bashbao secrets enable database
-bao write database/config/mongodb \
-  plugin_name=mongodb-database-plugin \
-  connection_url="mongodb://{{username}}:{{password}}@mongodb-0.mongodb:27017/admin" \
-  allowed_roles="app-role"
-bao write database/roles/app-role \
-  db_name=mongodb \
-  creation_statements='{"roles": [{"role": "readWrite"}]}' \
-  default_ttl="24h" \
-  max_ttl="24h"
-default_ttl="24h" — это и есть требуемая "automatic password rotation every 24 hours": каждые 24 часа lease истекает, OpenBao автоматически отзывает старые креды и выдаёт новые при следующем запросе.
-4. Injection в workloads — два практичных варианта:
+### Database Secrets Engine
 
-OpenBao Agent Injector (Vault-совместимый sidecar-инжектор, автоматически монтирует секреты как файлы в под через аннотации).
-External Secrets Operator (ESO) + OpenBao как backend — тянет секреты и создаёт нативные K8s Secret'ы, регулярно синхронизируя.
-
-5. Синхронизация без ручного вмешательства — ESO при настроенном refreshInterval (например, 1h) сам подтягивает новые креды из OpenBao и обновляет K8s Secret, на который смотрит твой Deployment — при следующем цикле пересоздания пода (или через reloader-контроллер) приложение подхватывает новые креды автоматически.
-Важное предупреждение по ресурсам, раз уже сталкивался с этим на Trivy: OpenBao + ESO — это минимум два новых постоянных компонента в и без того плотном 6GB кластере. Прежде чем начинать реализацию, стоит явно проверить оставшийся RAM-бюджет по всем namespace, иначе рискуешь повторить длинную сессию отладки quota/OOM, как с Trivy Server.
+#### How it works mechanically (steps)
+```
+1. Configure Database Secrets Engine, giving OpenBao admin access to MongoDB (admin credentials that can create users)
+                    │
+                    ▼
+2. Create a "role" (e.g., backend-db-role) that describes:
+- what permissions the generated user should have (readWrite, etc.)
+- TTL = 24h (default_ttl)
+                    │
+                    ▼
+3. When a pod requests a credential (bao read database/creds/backend-db-role):
+OpenBao itself logs into MongoDB as admin
+→ It itself creates a new temporary user (random name + random password)
+→ returns these credentials to the pod
+                    │
+                    ▼
+4. After 24 hours (TTL expired):
+OpenBao itself Logs into MongoDB as admin
+→ Deletes this temporary user (revoke)
+→ If the pod requests credentials again, it will receive a BRAND NEW user
+```
