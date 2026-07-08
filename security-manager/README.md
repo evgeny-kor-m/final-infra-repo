@@ -2,6 +2,9 @@
 ### OpenBao
 https://openbao.org/docs/platform/k8s/helm/run/
 
+[!] https://medium.com/@PlatformEnthusiast/the-secret-layer-how-openbao-protects-your-kubernetes-cluster-752549c1c620  
+For Enable automatic password every rotation 24h" and "synchronized without manual intervention need the Database Secrets Engine  
+
 #### install
 helm repo add openbao https://openbao.github.io/openbao-helm
 helm search repo openbao/openbao

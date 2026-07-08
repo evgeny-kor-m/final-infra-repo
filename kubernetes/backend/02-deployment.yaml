@@ -25,6 +25,11 @@ spec:
           export DB_ReadOnly_User="{{ .Data.data.DB_ReadOnly_User }}"
           export DB_ReadOnly__Pass="{{ .Data.data.DB_ReadOnly__Pass }}"
           {{- end }}
+          vault.hashicorp.com/agent-limits-cpu: "100m"
+        vault.hashicorp.com/agent-limits-mem: "64Mi"
+        vault.hashicorp.com/agent-requests-cpu: "50m"
+        vault.hashicorp.com/agent-requests-mem: "32Mi"
+        vault.hashicorp.com/agent-init-first: "true"
     spec:
       imagePullSecrets:
       - name: nexus-registry-secret
