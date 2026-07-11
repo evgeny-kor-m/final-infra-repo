@@ -7,10 +7,10 @@ metadata:
   namespace: backend
 spec:
   hard:
-    requests.cpu: "350m"     # 5 x 70m
-    requests.memory: "600Mi" # 5 x 120Mi
-    limits.cpu: "750m"       # 5 x 150m
-    limits.memory: "750Mi"   # 5 x 150Mi
+    requests.cpu: "500m"     # 5 x 70m
+    requests.memory: "900Mi" # 5 x 120Mi
+    limits.cpu: "1000m"       # 5 x 150m
+    limits.memory: "1200Mi"   # 5 x 150Mi
 ---
 apiVersion: v1
 kind: LimitRange

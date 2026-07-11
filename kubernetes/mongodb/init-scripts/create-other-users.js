@@ -10,9 +10,9 @@ try {
     roles: [{ role: 'read', db: 'hoteldb' }]
   });
   db.getSiblingDB("admin").createUser({
-  user: "superadmin",
-  pwd: "superpassw",
-  roles: [{ role: "userAdminAnyDatabase", db: "admin" }, { role: "readWrite", db: "admin" }]
+    user: "superadmin",
+    pwd: "superpassw",
+    roles: [{ role: "userAdminAnyDatabase", db: "admin" }, { role: "readWrite", db: "admin" }]
   })
   print('Users created!');
 } catch(e) {

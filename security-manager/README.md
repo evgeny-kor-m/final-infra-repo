@@ -105,19 +105,26 @@ bao write auth/kubernetes/role/backend-role \
     policies=mongodb-read \
     ttl=1h
 # ttl=1h — OpenBao token lifetime after pod authentication
+
+kubectl exec -it openbao-0 -n openbao-ns -- bao status
 ```
 #### Inject secrets into workloads
 ```
-Reference: Vault Agent Injector annotations (OpenBao is Vault-API-compatible, hence the `vault.hashicorp.com/*` annotation prefix)
+Note: The sidecar container lives permanently with the application.
+vault.hashicorp.com/agent-inject-static-secret-render-interval: "5m" - This annotation tells the sidecar: to check the secret value every 5 minutes manually
+
+Note: OpenBao is Vault-API-compatible, so its Agent Injector still uses the legacy `vault.hashicorp.com/*` annotation prefix.
+
 # deployment.yaml (backend-app)  
 ...
       annotations:
+         # Turn on the injection mechanism
         vault.hashicorp.com/agent-inject: "true"
-        # What role should I use when logging into OpenBao
+         # What role should use when logging into OpenBao
         vault.hashicorp.com/role: "backend-role"
-        # Where to get the secret and what to name the resulting file (mongodb.env)
+         # Where to get the secret in OpenBao and what to name the resulting file (mongodb.env)
         vault.hashicorp.com/agent-inject-secret-mongodb.env: "secret/data/mongodb"
-        # How to format file contents
+         # How to format file contents
         vault.hashicorp.com/agent-inject-template-mongodb.env: |
           {{- with secret "secret/data/mongodb" -}}
           export DB_ReadWrite_User="{{ .Data.data.DB_ReadWrite_User }}"
@@ -125,13 +132,13 @@ Reference: Vault Agent Injector annotations (OpenBao is Vault-API-compatible, he
           export DB_ReadOnly_User="{{ .Data.data.DB_ReadOnly_User }}"
           export DB_ReadOnly__Pass="{{ .Data.data.DB_ReadOnly__Pass }}"
           {{- end }}
-        # KV secrets have no lease/TTL, so the sidecar must be told to poll for changes
+         # This annotation tells the sidecar: to check the secret value every 5 minutes manually
         vault.hashicorp.com/agent-inject-static-secret-render-interval: "5m"
         vault.hashicorp.com/agent-limits-cpu: "100m"
         vault.hashicorp.com/agent-limits-mem: "64Mi"
         vault.hashicorp.com/agent-requests-cpu: "50m"
         vault.hashicorp.com/agent-requests-mem: "32Mi"
-        # Ensures the init-container completes (secret file exists) before the main container starts
+         # Ensures the init-container completes (secret file exists) before the main container starts
         vault.hashicorp.com/agent-init-first: "true"
 ...
         command: ["/bin/sh", "-c"]
@@ -193,9 +200,9 @@ kubectl logs backend-app-6c665f859d-n8gqp -n backend -c backend-container
 ```
 # ServiceAccount & CronJob (`backend` namespace)
 kubectl apply -f security-manager/
-kubectl get cronjob -n backend
+kubectl get cronjob,job -n backend
 ```
-### OpenBao policy + Kubernetes Auth role (write access, unlike `mongodb-read` above):
+### OpenBao policy + Kubernetes Auth role (write access):
 ```
 kubectl exec -it openbao-0 -n openbao-ns -- sh
 
@@ -214,20 +221,73 @@ bao write auth/kubernetes/role/rotator-role \
     ttl=15m
 ```
 #### `superadmin` is a dedicated MongoDB user (role `userAdminAnyDatabase`) created specifically for credential rotation — not the cluster's root `admin` account.
+  db.getSiblingDB("admin").createUser({
+    user: "superadmin",
+    pwd: "superpassw",
+    roles: [{ role: "userAdminAnyDatabase", db: "admin" }, { role: "readWrite", db: "admin" }]
+  })
+
+#### Troubleshooting
+kubectl get pods -n openbao-ns
+
+kubectl get mutatingwebhookconfiguration -A
+kubectl describe mutatingwebhookconfiguration openbao-agent-injector-cfg | grep -A3 "Failure Policy"
+
+kubectl exec -it openbao-0 -n openbao-ns -- bao status
+
+kubectl exec -it openbao-0 -n openbao-ns -- bao read auth/kubernetes/role/backend-role
+
+kubectl logs -n openbao-ns openbao-agent-injector-7f96c5d6c6-q8zm4
+
+Note: Known risk: the injector's auto-TLS certificates are short-lived and require periodic pod restarts (or setting up persistent, longer-lived TLS via cert-manager)—otherwise, the problem will reoccur after a few days of downtime.
+
+### Verify end-to-end
+kubectl describe pod backend-app-5fbc946d87-kbrjd -n backend | grep -A5 "Init Containers"
+Init Containers:
+  vault-agent-init:
+    Container ID:  containerd://f3ae270aa81159c8741707898c5f3566a07f0e748e42410e54b639fb8ad4a045
+    Image:         quay.io/openbao/openbao:2.5.5
+    Image ID:      quay.io/openbao/openbao@sha256:6150c4a6b62067db6141c8da7a6a6b5763f4f47c315343d0c848b40fecdfd452
+    Port:          <none>
+
+kubectl logs backend-app-5fbc946d87-kbrjd -n backend -c backend-container --tail=20
+
+kubectl exec -it openbao-0 -n openbao-ns -- bao kv get secret/mongodb
+======= Metadata =======
+Key                Value
+---                -----
+created_time       2026-07-08T14:05:25.218026349Z
+version            5
+
+========== Data ==========
+Key                  Value
+---                  -----
+DB_ReadOnly_User     readonly_user
+DB_ReadOnly__Pass    dRCdvZrPPCxdTGfzMK0o
+DB_ReadWrite_Pass    oG2sPC4WHsvIEWcmSKVW
+DB_ReadWrite_User    backend_user
+
+kubectl exec -it backend-app-5fbc946d87-kbrjd -n backend -c backend-container -- cat /vault/secrets/mongodb.env
+export DB_ReadWrite_User="backend_user"
+export DB_ReadWrite_Pass="oG2sPC4WHsvIEWcmSKVW"
+export DB_ReadOnly_User="readonly_user"
+export DB_ReadOnly__Pass="dRCdvZrPPCxdTGfzMK0o"
+
+check if application is work
 
 #### Manual test run (without waiting for midnight)
 
+kubectl get cronjob,job -n backend
 kubectl delete job test-rotation-now -n backend
 
-kubectl create job --from=cronjob/mongodb-password-rotator test-rotation-now -n backend
+kubectl create job --from=cronjob/mongodb-password-rotator test-rotation-4 -n backend
 kubectl get pods -n backend -w
 
-kubectl logs -f job/test-rotation-3-r2pj5 -n backend
+kubectl logs -f job/test-rotation-4 -n backend
 
-### Verified end-to-end
+
+
 
 kubectl exec -it openbao-0 -n openbao-ns -- bao kv get secret/mongodb
 
-kubectl exec -it backend-app-ddc989494-x96t8 -n backend -c backend-container -- cat /vault/secrets/mongodb.env
-
-check if application is work
+kubectl exec -it backend-app-5fbc946d87-kbrjd -n backend -c backend-container -- cat /vault/secrets/mongodb.env
