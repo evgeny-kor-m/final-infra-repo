@@ -6,10 +6,10 @@ metadata:
   namespace: jenkins-ns
 spec:
   hard:
-    requests.cpu: "700m"
+    requests.cpu: "1000m"
     requests.memory: "1.4Gi"
-    limits.cpu: "1.5"
-    limits.memory: "2.4Gi"   # bumped slightly: 768Mi (controller) + 1536Mi (agent) + small buffer
+    limits.cpu: "2000m"
+    limits.memory: "3.5Gi"   # bumped slightly: 768Mi (controller) + 1536Mi (agent) + small buffer
 ---
 apiVersion: v1
 kind: LimitRange
