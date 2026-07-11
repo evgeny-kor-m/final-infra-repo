@@ -9,5 +9,6 @@ data:
       API_URL: '/api',
       APM_ENABLED: true,
       APM_SERVER_URL: 'http://localhost:8200'
+### kubectl port-forward -n monitoring svc/apm-server-apm-server 8200:8200
     }
 
