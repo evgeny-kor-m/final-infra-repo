@@ -18,6 +18,7 @@ For Enable automatic password every rotation 24h" and "synchronized without manu
 helm repo add openbao https://openbao.github.io/openbao-helm
 helm search repo openbao/openbao
 helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
+kubectl  get all,secrets,svc,configmap -n openbao-ns
 
 ##### Initialize and unseal OpenBao
 ```
@@ -38,7 +39,24 @@ Unseal the OpenBao server with the key shares until the key threshold is met:
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal PsRwysYrHBUKQeQFfMMilvpC6hSWde7dh5SK4NOFLjaH
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal pB9DCbHbAjTNSKveYVCvM2NHXEcfRkeLA6wLitDIVNJ3
 kubectl exec -it openbao-0 -n openbao-ns -- bao operator unseal jYtrQFtEzvSyRslxoZQyYSuOuiEAAuLXKxQ8cz0hl+aC
+
 ```
+#### UI 
+```
+kubectl port-forward service/openbao 8200:8200  -n openbao-ns
+
+http://localhost:8200
+
+Namespace :  / (Root) # this is the default
+Method    : Token     # this is the only easy way to log in manually (Kubernetes Auth Method configured for pods)
+Token     : enter Root Token - s.s6ukuScUSdiepQguWDPkcZ4p.
+
+# To view 
+- Secrets -> secret/ -> mongodb — visually view current values ​​(DB_ReadWrite_User, DB_ReadWrite_Pass), KV v2 stores versions history
+- Access -> Auth Methods -> kubernetes — visually view the Kubernetes Auth Method configuration.
+- Policies — view mongodb-read/mongodb-rotate
+```
+
 #### Configure authentication between Kubernetes and OpenBao
 ```
 https://openbao.org/docs/auth/kubernetes/
@@ -46,13 +64,17 @@ https://openbao.org/docs/auth/kubernetes/
 kubectl exec -it openbao-0 -n openbao-ns -- sh
 bao login s.s6ukuScUSdiepQguWDPkcZ4p
 bao auth enable kubernetes
+
 # Allows (backend, frontend) pods to authenticate in OpenBao with their own ServiceAccount token, without separate static credentials.
+
 bao write auth/kubernetes/config \
     kubernetes_host="https://kubernetes.default.svc:443"
 ```
 #### Store credentials (KV v2)
 ```
 https://openbao.org/docs/concepts/policies/
+
+kubectl port-forward service/openbao 8200:8200  -n openbao-ns
 
 # Chain: default ServiceAccount in namespace backend → role backend-role → policy mongodb-read → secret secret/mongodb.
 
@@ -62,6 +84,9 @@ path "secret/data/mongodb" {
 }
 EOF
 
+# List all enabled policies:
+bao policy list
+
 # kv-v2 static storage
 bao secrets enable -path=secret kv-v2
 
@@ -70,6 +95,9 @@ bao kv put secret/mongodb \
     DB_ReadWrite_Pass="backend_pass" \
     DB_ReadOnly_User="readonly_user" \
     DB_ReadOnly__Pass="readonly_pass"
+
+# Read the Latest Secret Version:
+bao kv get secret/mongodb
 
 bao write auth/kubernetes/role/backend-role \
     bound_service_account_names=default \
@@ -200,6 +228,6 @@ kubectl logs -f job/test-rotation-3-r2pj5 -n backend
 
 kubectl exec -it openbao-0 -n openbao-ns -- bao kv get secret/mongodb
 
-kubectl exec -it backend-app-6b7676cd59-rwqcr -n backend -c backend-container -- cat /vault/secrets/mongodb.env
+kubectl exec -it backend-app-ddc989494-x96t8 -n backend -c backend-container -- cat /vault/secrets/mongodb.env
 
 check if application is work
