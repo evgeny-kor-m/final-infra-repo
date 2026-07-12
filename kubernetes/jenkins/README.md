@@ -104,8 +104,8 @@ Fill:
 - Script Path -> pipelines/build.Jenkinsfile
 ```
 ### Kubernetes with Jenkins Dynamic Agents
-Dynamic Agents: Agents are Kubernetes pods that vanish after jobs finish. No more paying for idle VMs!
-Auto-Scaling: Need 10 agents at 2 PM and zero at 2 AM? Kubernetes handles it. (optional)
+Dynamic Agents: Agents are Kubernetes pods that vanish after jobs finish. No more paying for idle VMs!   
+Auto-Scaling: Need 10 agents at 2 PM and zero at 2 AM? Kubernetes handles it. (optional)   
 Consistent Environments: Every job runs in a fresh, Dockerized workspace.   
 #### Connect Jenkins to Kubernetes
 Jenkins configurations:  
@@ -179,7 +179,8 @@ Jenkins UI → admin → Security → API Token → Add new Token
 curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733
 ```
 ##### Using Kaniko instead Docker for build and pushing image
-Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access. It runs inside a container (for example, in a Kubernetes pod), making it ideal for secure CI/CD environments.   
+Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access.   
+It runs inside a container (for example, in a Kubernetes pod), making it ideal for secure CI/CD environments.   
 
 In Dockerfile agent:   
 ```
@@ -293,16 +294,16 @@ SMTP is configured in
 Manage Jenkins → System → 
 Extended E-mail Notification:
 Field Value SMTP servers:  smtp.gmail.com 
-SMTP Port 465 Use SMTP Authentication ✅ 
+SMTP Port 465 Use SMTP Authentication [v]  
 User Name evgeny.korchev@gmail.com 
 Password 16-character password (without spaces - Jenkins usually accepts both with and without spaces, but it's cleaner to insert them together) 
-Use SSL ✅ 
+Use SSL [v]  
 Default Content: Type HTML (text/html)
 ---
 E-mail Notification: 
 User Name evgeny.korchev@gmail.com
 Password16-значный App Password 
-Use SSL✅ 
+Use SSL [v]  
 Use TLSоставь empty
 SMTP Port 465
 Reply-To Address evgeny.korchev@gmail.com
