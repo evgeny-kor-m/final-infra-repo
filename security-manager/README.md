@@ -221,13 +221,15 @@ bao write auth/kubernetes/role/rotator-role \
     ttl=15m
 ```
 #### `superadmin` is a dedicated MongoDB user (role `userAdminAnyDatabase`) created specifically for credential rotation — not the cluster's root `admin` account.
+```
   db.getSiblingDB("admin").createUser({
     user: "superadmin",
     pwd: "superpassw",
     roles: [{ role: "userAdminAnyDatabase", db: "admin" }, { role: "readWrite", db: "admin" }]
   })
-
+```
 #### Troubleshooting
+```
 kubectl get pods -n openbao-ns
 
 kubectl get mutatingwebhookconfiguration -A
@@ -240,8 +242,9 @@ kubectl exec -it openbao-0 -n openbao-ns -- bao read auth/kubernetes/role/backen
 kubectl logs -n openbao-ns openbao-agent-injector-7f96c5d6c6-q8zm4
 
 Note: Known risk: the injector's auto-TLS certificates are short-lived and require periodic pod restarts (or setting up persistent, longer-lived TLS via cert-manager)—otherwise, the problem will reoccur after a few days of downtime.
-
+```
 ### Verify end-to-end
+```
 kubectl describe pod backend-app-5fbc946d87-kbrjd -n backend | grep -A5 "Init Containers"
 Init Containers:
   vault-agent-init:
@@ -274,9 +277,9 @@ export DB_ReadOnly_User="readonly_user"
 export DB_ReadOnly__Pass="dRCdvZrPPCxdTGfzMK0o"
 
 check if application is work
-
+```
 #### Manual test run (without waiting for midnight)
-
+```
 kubectl get cronjob,job -n backend
 kubectl delete job test-rotation-now -n backend
 
@@ -284,7 +287,7 @@ kubectl create job --from=cronjob/mongodb-password-rotator test-rotation-4 -n ba
 kubectl get pods -n backend -w
 
 kubectl logs -f job/test-rotation-4 -n backend
-
+```
 
 
 
