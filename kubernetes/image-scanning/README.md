@@ -1,13 +1,6 @@
 ## Image Scanning and Vulnerability Analysis
-
-Trivy remains the right choice because:
-
-It doesn't require a database or server—it's just a binary in the agent pod (critical with 6GB of RAM).
---exit-code 1 provides the desired "fail pipeline" behavior out of the box without any additional logic.
-The only free tool that scans both OS layers and application dependencies equally well (Flask backend + React frontend).
-
 https://oneuptime.com/blog/post/2026-02-02-trivy-container-scanning/view  
-https://oneuptime.com/blog/post/2026-01-27-trivy-kubernetes-security/view#installing-the-trivy-operator
+https://oneuptime.com/blog/post/2026-01-27-trivy-kubernetes-security/view#installing-the-trivy-operator  
 
 ### Used in Dynamic Jenkins Agent
 ```
