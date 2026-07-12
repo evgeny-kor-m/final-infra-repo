@@ -1,5 +1,9 @@
 # final-infra-repo
 
+<p align="left">
+  <img src="docs/schema.jpg" width="500" alt="view"/>
+</p>
+
 ### Sync .wslconfig with Docker Desktop to limit resources
 [wsl2]
 kernelCommandLine = systemd.unified_cgroup_hierarchy=1

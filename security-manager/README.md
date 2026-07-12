@@ -216,7 +216,7 @@ EOF
 
 bao write auth/kubernetes/role/rotator-role \
     bound_service_account_names=rotator-sa \
-    bound_service_account_namespaces=backend \
+    bound_service_account_namespaces=openbao-ns \
     policies=mongodb-rotate \
     ttl=15m
 ```

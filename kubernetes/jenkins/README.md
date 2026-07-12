@@ -120,7 +120,7 @@ Jenkins configurations:
   → install 'Kubernetes' Plugin  
   → Restart Jenkins  
 
-- Prerequisites & Cluster RBAC:  Jenkins needs explicit permissions to interact with your cluster's API to spin up and terminate agent pods.  
+- Prerequisites & Cluster Role-based access control (RBAC):  Jenkins needs explicit permissions to interact with your cluster's API to spin up and terminate agent pods.  
 Create a service account, role, and role binding inside your dedicated Jenkins namespace.  
 
 # Configure Jenkins Cloud Provider - [Jenkins] → [kube-kind (Cloud)] → [Kubernetes API]:  
