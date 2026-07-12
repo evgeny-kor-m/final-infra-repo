@@ -1,7 +1,7 @@
 # final-infra-repo
 
 <p align="left">
-  <img src="docs/schema.jpg" width="500" alt="view"/>
+  <img src="docs/schema.jpg" width="1000" alt="view"/>
 </p>
 
 ### Sync .wslconfig with Docker Desktop to limit resources
