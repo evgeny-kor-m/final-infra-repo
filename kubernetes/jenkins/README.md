@@ -2,13 +2,13 @@
 https://www.jenkins.io/doc/book/installing/kubernetes/
 https://github.com/scriptcamp/kubernetes-jenkins  
 https://devopscube.com/setup-jenkins-on-kubernetes-cluster/  
-
+```
 1. Create a Namespace
 2. Create a service account with Kubernetes admin permissions.
 3. Create local persistent volume for persistent Jenkins data on Pod restarts.
 4. Create a deployment YAML and deploy it.
 5. Create a service YAML and deploy it.
-
+```
 # Run
 ```
   kubectl apply -f kubernetes/jenkins -n jenkins-ns
@@ -22,11 +22,11 @@ http://localhost:30003
 admin/admin  
 ```
 ### Access to GitHub Repo
-PAT on GitHub / Frontend / Backend for CI
-Repositories:
-├── Metadata    -> Read-only
-├── Contents    -> Read and Write access to code
-└── Webhooks    -> Read-only
+PAT on GitHub / Frontend / Backend for CI  
+Repositories:  
+├── Metadata    -> Read-only   
+├── Contents    -> Read and Write access to code  
+└── Webhooks    -> Read-only   
 
 ### Add credential to Jenkins
 ```
@@ -62,29 +62,28 @@ docker tag jenkins-inbound-agent-image:v7  172.26.13.131:8083/jenkins-inbound-ag
 docker push 172.26.13.131:8083/jenkins-inbound-agent-image:v7
 ```
 #### Configure Ngrok  
-install ngrok in order to create static IP and proxy to your computer.  
-https://ngrok.com/download/windows?tab=download
+install ngrok in order to create static IP and proxy to your computer.   
+https://ngrok.com/download/windows?tab=download   
 
-registrate  
+registrate   
 
 - run ngrok.exe     
-- ngrok config add-authtoken 3BfhaedAenZ3lAuY3KY5viQIIIF_7ixX7TgMjGArTTt7rFNFb
-- Extra Port Mappings for Jenkins is - 30003
+- ngrok config add-authtoken 3BfhaedAenZ3lAuY3KY5viQIIIF_7ixX7TgMjGArTTt7rFNFb   
+- Extra Port Mappings for Jenkins is - 30003    
 ```
 ngrok http 30003
 
 RES: Forwarding    https://lightless-rocco-climacterically.ngrok-free.dev -> http://localhost:30003  
 ```
 #### Configure github webhook on Push event for frontend/backend repo
-Trigger: PUSH → DEV branch  
-github > (Reposirory) > settings > webhooks > Add webhook  
+Trigger: PUSH → DEV branch   
+github > (Reposirory) > settings > webhooks > Add webhook    
 ```
 Fill:  
 - Payload URL: <url from ngrok Forwarding> https://lightless-rocco-climacterically.ngrok-free.dev <and> /generic-webhook-trigger/ <and> /invoke?token=build-token
 - Content type: application/json
 - Let me select individual events: Pushes
 - [v] Active  
-
 ```
 #### Generic Webhook Trigger Plugin:
 // Automated: Manage Jenkins → Plugins → Generic Webhook Trigger
