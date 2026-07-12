@@ -15,11 +15,12 @@ https://openbao.org/docs/platform/k8s/helm/run/
 For Enable automatic password every rotation 24h" and "synchronized without manual intervention need the Database Secrets Engine  
 
 #### Deploy 
+```
 helm repo add openbao https://openbao.github.io/openbao-helm
 helm search repo openbao/openbao
 helm install openbao openbao/openbao --namespace openbao-ns --create-namespace
 kubectl  get all,secrets,svc,configmap -n openbao-ns
-
+```
 ##### Initialize and unseal OpenBao
 ```
 kubectl exec -it openbao-0 -n openbao-ns -- bao status
