@@ -288,10 +288,11 @@ kubectl create job --from=cronjob/mongodb-password-rotator test-rotation-4 -n ba
 kubectl get pods -n backend -w
 
 kubectl logs -f job/test-rotation-4 -n backend
+kubectl exec -it openbao-0 -n openbao-ns -- bao kv get secret/mongodb
+
+kubectl exec -it backend-app-5fbc946d87-kbrjd -n backend -c backend-container -- cat /vault/secrets/mongodb.env
 ```
 
 
 
-kubectl exec -it openbao-0 -n openbao-ns -- bao kv get secret/mongodb
 
-kubectl exec -it backend-app-5fbc946d87-kbrjd -n backend -c backend-container -- cat /vault/secrets/mongodb.env
