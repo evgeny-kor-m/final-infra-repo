@@ -5,14 +5,13 @@
 </p>
 
 ### Sync .wslconfig with Docker Desktop to limit resources
+```
 [wsl2]
 kernelCommandLine = systemd.unified_cgroup_hierarchy=1
 memory=8GB
 processors=8
 swap=2GB
-
-Namespacerequests.memrequests.cpulimits.memlimits.cpujenkins-ns1Gi1.01.3Gi1.5argocd700Mi0.51Gi1.0nexus-ns600Mi0.4900Mi0.8monitoring2Gi1.02.8Gi2.0frontend200Mi0.2350Mi0.4backend200Mi0.2350Mi0.4database300Mi0.2500Mi0.4Сумма requests~5Gi~3.5 coresСумма limits~7.2Gi~6.5 cores
-
+```
 ## Database MongoDB
 
 For production, MongoDB Operator or Bitnami Helm would be used.  
