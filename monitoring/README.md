@@ -2,9 +2,7 @@
 https://medium.com/@muppedaanvesh/a-hands-on-guide-to-kubernetes-logging-using-elk-stack-filebeat-part-4-%EF%B8%8F-48e233443961
 
 <p align="left">
-  <img src="pic/ELK.jpg" width="500" alt="view"/>
   <img src="pic/EFLK.jpg" width="500" alt="view"/>
-  <img src="pic/ELKF-Stack.jpg" width="500" alt="view"/>
 </p>
 
 # 
