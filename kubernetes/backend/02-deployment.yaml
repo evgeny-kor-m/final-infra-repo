@@ -36,7 +36,7 @@ spec:
       - name: nexus-registry-secret
       containers:
       - name: backend-container
-        image: nexus-service.nexus-ns.svc.cluster.local:8083/backend-image:2bdc70585e4a3d14f6adf6ffbb648b572bba8e3e
+        image: nexus-service.nexus-ns.svc.cluster.local:8083/backend-image:dd62aaaccfdb8d95c3c4f1bed5f0678df89fa565
         imagePullPolicy: Always # Always pull # IfNotPresent # use local image if exists, skip pulling
         command: ["/bin/sh", "-c"]
         args:
