@@ -12,7 +12,7 @@ https://openbao.org/docs/platform/k8s/helm/run/
 | 6 | Synchronize rotated secrets to running applications without manual intervention |        |
 
 [!] https://medium.com/@PlatformEnthusiast/the-secret-layer-how-openbao-protects-your-kubernetes-cluster-752549c1c620  
-For Enable automatic password every rotation 24h" and "synchronized without manual intervention need the Database Secrets Engine  
+For Enable automatic password every rotation 24h"
 
 #### Deploy 
 ```
