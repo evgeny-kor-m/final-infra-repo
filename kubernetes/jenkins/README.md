@@ -310,3 +310,5 @@ Reply-To Address evgeny.korchev@gmail.com
 Charsetоставь UTF-8
 - Test configuration
 ``` 
+### Trivy Image Scanner
+https://medium.com/@lilnya79/integrating-jenkins-with-trivy-222eaa7a70be
