@@ -24,7 +24,7 @@ source alias.txt
 
 #### Deployment
 ```
-# Run /deploy.sh to deploy following parts automaticaly:
+# Run ./deploy.sh to deploy following parts automaticaly:
 Namespaces
 LimitRange & ResourceQuota
 Secrets
@@ -32,7 +32,7 @@ Mongodb 3 replicas and initially data
 Mongo-express
 Nexus
 
-# To deploy the following components, follow the instructions in their README files.
+# To deploy the following components, follow the instructions in their README.md files.
 Nexus init configuration include push first application images
 Jenkins and configurations
 ArgoCD
@@ -43,6 +43,19 @@ kubectl wait --for=condition=Ready pod/backend-app -n backend --timeout=300s
 
 # To deploy frontend
 kubectl apply -f kubernetes/frontend/ -n frontend
+
+## 
+# To deploy ELK follow the instructions in Monitoring README.md file
+```
+
+#### Switch betwin scenarios
+```
+To scale-down EFLK and scale-up ArgoCD Jenkins Nexus and use DEV scenario run:
+./kubernetes/Scenario-A-dev-ci-cd.sh
+
+To scale-down ArgoCD Jenkins Nexus and scale-up EFLK and use Monitoring scenario run:
+./kubernetes/Scenario-B-monitoring.sh
+
 ```
 
 #### Temporary Solution. Copy image into cluster manually
