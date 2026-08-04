@@ -16,7 +16,7 @@ https://devopscube.com/setup-jenkins-on-kubernetes-cluster/
   kubectl -n jenkins-ns get all,secrets,svc,configmap
 
   kubectl exec jenkins-0  -n jenkins-ns -- cat /var/jenkins_home/secrets/initialAdminPassword
-  b92ec6fc4a204730b2d12a997cccd002
+  ****************************
 
 http://localhost:30003
 admin/admin  
@@ -68,7 +68,7 @@ https://ngrok.com/download/windows?tab=download
 registrate   
 
 - run ngrok.exe     
-- ngrok config add-authtoken 3BfhaedAenZ3lAuY3KY5viQIIIF_7ixX7TgMjGArTTt7rFNFb   
+- ngrok config add-authtoken 3************************************************b   
 - Extra Port Mappings for Jenkins is - 30003    
 ```
 ngrok http 30003
@@ -176,7 +176,7 @@ curl -X POST "https://lightless-rocco-climacterically.ngrok-free.dev/generic-web
 Run the Job via the Jenkins API:
 Jenkins UI → admin → Security → API Token → Add new Token
 → copy <api-token>
-curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:110fcf28b021007da3a20ce2c98a9a7733
+curl -X POST "http://localhost:30003/job/ci_pipeline/build"  --user admin:**************************************
 ```
 ##### Using Kaniko instead Docker for build and pushing image
 Kaniko is an open-source tool from Google Cloud that allows you to build Docker images from a Dockerfile without using a Docker daemon or privileged (root) access.   
