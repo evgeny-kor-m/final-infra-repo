@@ -85,7 +85,7 @@ kubectl wait --for=condition=Ready pod/nexus-0 -n nexus-ns --timeout=300s
 # curl -X PUT \
 #   "http://localhost:8082/service/rest/v1/security/users/admin/change-password" \
 #   -H "Content-Type: text/plain" \
-#   -u admin:00bb4c5e-1afb-4bde-ab3c-45ba6d276230 \
+#   -u admin:******************************* \
 #   -d "nexusadmin"
 
 # docker login 172.26.13.131:8083 -u admin -p nexusadmin
