@@ -4,6 +4,10 @@
   <img src="docs/schema.jpg" width="1100" alt="view"/>
 </p>
 
+### Project include 
+backend repo:   https://github.com/evgeny-kor-m/final-backend-repo  
+frontend repo:  https://github.com/evgeny-kor-m/final-frontend-repo  
+
 ### Sync .wslconfig with Docker Desktop to limit resources
 ```
 [wsl2]
